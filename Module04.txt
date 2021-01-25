@@ -1,0 +1,1548 @@
+[root@cdh6 ~]# ls -l /etc/hive/conf/
+total 64
+-rw-r--r-- 1 root root   20 Sep 15 13:41 __cloudera_generation__
+-rw-r--r-- 1 root root   70 Sep 15 13:41 __cloudera_metadata__
+-rw-r--r-- 1 root root 3656 Sep 15 13:41 core-site.xml
+-rw-r--r-- 1 root root  617 Sep 15 13:41 hadoop-env.sh
+-rw-r--r-- 1 root root 1705 Sep 15 13:41 hdfs-site.xml
+-rw-r--r-- 1 root root 2655 Sep 15 13:41 hive-env.sh
+-rw-r--r-- 1 root root 6493 Sep 15 13:41 hive-site.xml
+-rw-r--r-- 1 root root  310 Sep 15 13:41 log4j.properties
+-rw-r--r-- 1 root root 5299 Sep 15 13:41 mapred-site.xml
+-rw-r--r-- 1 root root 1661 Sep 15 13:41 redaction-rules.json
+-rw-r--r-- 1 root root  315 Sep 15 13:41 ssl-client.xml
+-rw-r--r-- 1 root root  190 Sep 15 13:41 topology.map
+-rwxr-xr-x 1 root root 1594 Sep 15 13:41 topology.py
+-rw-r--r-- 1 root root 3674 Sep 15 13:41 yarn-site.xml
+
+[root@cdh6 ~]# cat /etc/hive/conf/hive-site.xml
+<configuration>
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://cdh6:9083</value>
+  </property>
+  <property>
+    <name>hive.metastore.client.socket.timeout</name>
+    <value>300</value>
+  </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/user/hive/warehouse</value>
+  </property>
+  <property>
+    <name>hive.warehouse.subdir.inherit.perms</name>
+    <value>true</value>
+  </property>
+  <property>
+
+[cloudera@cdh6 ~]$ hive
+WARNING: Use "yarn jar" to launch YARN applications.
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/jars/log4j-slf4j-impl-2.8.2.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/jars/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+
+Logging initialized using configuration in jar:file:/opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/jars/hive-common-2.1.1-cdh6.3.2.jar!/hive-log4j2.properties Async: false
+
+WARNING: Hive CLI is deprecated and migration to Beeline is recommended.
+-----------------------------------------------------------------------------------------------------------------------------------
+[cloudera@cdh6 ~]$ beeline -u jdbc:hive2://cdh6:10000 -n cloudera
+WARNING: Use "yarn jar" to launch YARN applications.
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/jars/log4j-slf4j-impl-2.8.2.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/jars/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://cdh6:10000
+Connected to: Apache Hive (version 2.1.1-cdh6.3.2)
+Driver: Hive JDBC (version 2.1.1-cdh6.3.2)
+Transaction isolation: TRANSACTION_REPEATABLE_READ   --使用beeline連線到HIVE Server2時,可以使用Transaction Isolation Mode
+Beeline version 2.1.1-cdh6.3.2 by Apache Hive
+
+0: jdbc:hive2://cdh6:10000> show databases;
++----------------+
+| database_name  |
++----------------+
+| default        |
++----------------+
+1 row selected (1.619 seconds)
+
+0: jdbc:hive2://cdh6:10000> select count(*) from customers;
++--------+
+|  _c0   |
++--------+
+| 12435  |
++--------+
+1 row selected (19.754 seconds)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+hive> show databases;
+OK
+default
+Time taken: 3.06 seconds, Fetched: 1 row(s)
+hive> show tables from default;
+OK
+customers
+Time taken: 0.054 seconds, Fetched: 1 row(s)
+hive> use default;
+OK
+Time taken: 0.018 seconds
+hive> show tables;
+OK
+customers
+emp
+sample_07
+sample_08
+web_logs
+Time taken: 0.028 seconds, Fetched: 5 row(s)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+[root@cdh6 ~]# hdfs dfs -ls /user/hive/warehouse
+Found 5 items
+drwxr-xr-x   - cloudera hive          0 2020-09-15 10:28 /user/hive/warehouse/customers
+drwxr-xr-x   - cloudera hive          0 2020-09-17 11:34 /user/hive/warehouse/emp
+drwxrwxrwt   - admin    hive          0 2020-09-03 16:32 /user/hive/warehouse/sample_07
+drwxrwxrwt   - admin    hive          0 2020-09-03 16:32 /user/hive/warehouse/sample_08
+drwxrwxrwt   - admin    hive          0 2020-09-03 16:32 /user/hive/warehouse/web_logs
+                                                         -------------------- ---------
+                                                          database:default    table
+
+[root@cdh6 ~]# hdfs dfs -ls /user/hive/warehouse/customers/
+Found 5 items
+-rw-r--r--   1 cloudera hive          0 2020-09-15 10:28 /user/hive/warehouse/customers/_SUCCESS
+-rwxr-xr-x   1 cloudera hive     237145 2020-09-15 10:27 /user/hive/warehouse/customers/part-m-00000
+-rwxr-xr-x   1 cloudera hive     237965 2020-09-15 10:27 /user/hive/warehouse/customers/part-m-00001
+-rwxr-xr-x   1 cloudera hive     238092 2020-09-15 10:27 /user/hive/warehouse/customers/part-m-00002
+-rwxr-xr-x   1 cloudera hive     240323 2020-09-15 10:28 /user/hive/warehouse/customers/part-m-00003
+                                                                                        ------------
+                                                                                        table data
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+0: jdbc:hive2://cdh6:10000> select current_database();
++----------+
+|   _c0    |
++----------+
+| default  |
++----------+
+1 row selected (0.478 seconds)
+
+
+hive> create table t1                                 --/user/hive/warehouse/t1
+    > (col1 int,col2 varchar(10))
+    > row format delimited                            --row format delimited表示row之間是以特殊符號為間隔(一般來說是/n)
+    > fields terminated by ','                        --fields terminated by '符號'表示row的fields之間以所要求符號當作區隔
+    > stored as textfile;                             --檔案格式
+OK
+Time taken: 0.12 seconds
+
+0: jdbc:hive2://cdh6:10000> desc t1;
++-----------+--------------+----------+
+| col_name  |  data_type   | comment  |
++-----------+--------------+----------+
+| col1      | int          |          |
+| col2      | varchar(10)  |          |
++-----------+--------------+----------+
+2 rows selected (0.088 seconds)
+0: jdbc:hive2://cdh6:10000> desc formatted t1;
++-------------------------------+----------------------------------------------------+-----------------------------+
+|           col_name            |                     data_type                      |           comment           |
++-------------------------------+----------------------------------------------------+-----------------------------+
+| # col_name                    | data_type                                          | comment                     |
+|                               | NULL                                               | NULL                        |
+| col1                          | int                                                |                             |
+| col2                          | varchar(10)                                        |                             |
+|                               | NULL                                               | NULL                        |
+| # Detailed Table Information  | NULL                                               | NULL                        |
+| Database:                     | default                                            | NULL                        |
+| OwnerType:                    | USER                                               | NULL                        |
+| Owner:                        | cloudera                                           | NULL                        |
+| CreateTime:                   | Thu Sep 17 15:04:44 CST 2020                       | NULL                        |
+| LastAccessTime:               | UNKNOWN                                            | NULL                        |
+| Retention:                    | 0                                                  | NULL                        |
+| Location:                     | hdfs://cdh6:8020/user/hive/warehouse/t1            | NULL                        |   --目錄位置
+| Table Type:                   | MANAGED_TABLE                                      | NULL                        |
+| Table Parameters:             | NULL                                               | NULL                        |
+|                               | COLUMN_STATS_ACCURATE                              | {\"BASIC_STATS\":\"true\"}  |
+|                               | numFiles                                           | 0                           |
+|                               | numRows                                            | 0                           |
+|                               | rawDataSize                                        | 0                           |
+|                               | totalSize                                          | 0                           |
+|                               | transient_lastDdlTime                              | 1600326284                  |
+|                               | NULL                                               | NULL                        |
+| # Storage Information         | NULL                                               | NULL                        |
+| SerDe Library:                | org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe | NULL                        |
+| InputFormat:                  | org.apache.hadoop.mapred.TextInputFormat           | NULL                        |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat | NULL                |
+| Compressed:                   | No                                                 | NULL                        |
+| Num Buckets:                  | -1                                                 | NULL                        |
+| Bucket Columns:               | []                                                 | NULL                        |
+| Sort Columns:                 | []                                                 | NULL                        |
+| Storage Desc Params:          | NULL                                               | NULL                        |
+|                               | field.delim                                        | ,                           |  --欄位分隔符號為,
+|                               | serialization.format                               | ,                           |
++-------------------------------+----------------------------------------------------+-----------------------------+
+33 rows selected (0.213 seconds)
+
+--SELECT * FROM table,將直接讀對應的HDFS目錄下的所有檔案,不需要進行任何MR/SPARK job
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
++----------+----------+
+No rows selected (0.111 seconds)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+                  --此目錄下沒有檔案,也表示相對表格並沒有資料
+
+--在本地端生成檔案並上傳到/user/hive/warehouse/t1
+[cloudera@cdh6 ~]$ cat 1.txt
+100,Frank
+200,Scott
+Will,400
+300,Linda
+[cloudera@cdh6 ~]$ hdfs dfs -put 1.txt /user/hive/warehouse/t1/
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+Found 1 items
+-rw-r--r--   1 cloudera supergroup         30 2019-06-27 18:59 /user/hive/warehouse/t1/1.txt
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 100      | Frank    |
+| 200      | Scott    |
+| NULL     | 400      |    --col1定義為INT,而檔案內容為Will的字串
+| 300      | Linda    |
++----------+----------+
+4 rows selected (0.126 seconds)
+
+Time taken: 0.08 seconds, Fetched: 3 row(s)
+hive> select sum(col1),count(col2) from t1;
+Query ID = cloudera_20190627190000_bc4fc47d-1068-43a8-aac7-deca938afc9a
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Job = job_1561597102466_0006, Tracking URL = http://cdh6:8088/proxy/application_1561597102466_0006/
+Kill Command = /opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/hadoop/bin/hadoop job  -kill job_1561597102466_0006
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2019-06-27 19:01:01,442 Stage-1 map = 0%,  reduce = 0%
+2019-06-27 19:01:11,257 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 3.56 sec
+2019-06-27 19:01:20,939 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 8.18 sec
+MapReduce Total cumulative CPU time: 8 seconds 180 msec
+Ended Job = job_1561597102466_0006
+MapReduce Jobs Launched:
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 8.18 sec   HDFS Read: 8123 HDFS Write: 6 SUCCESS       --Hive on MapReduce
+Total MapReduce CPU Time Spent: 8 seconds 180 msec
+OK
+600     3
+Time taken: 35.633 seconds, Fetched: 1 row(s)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+--由於HDFS File的已存在區塊內容不能變更
+--但Hive Table對應的是HDFS目錄,藉由增加或減少目錄內的檔案個數來間接改變Hive Table內容
+[cloudera@cdh6 ~]$ hdfs dfs -rm /user/hive/warehouse/t1/1.txt
+20/09/17 15:18:37 INFO fs.TrashPolicyDefault: Moved: 'hdfs://cdh6:8020/user/hive/warehouse/t1/1.txt' to trash at: hdfs://cdh6:8020/user/cloudera/.Trash/Current/user/hive/warehouse/t1/1.txt
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+[cloudera@cdh6 ~]$ hdfs dfs -put 2.txt /user/hive/warehouse/t1/
+[cloudera@cdh6 ~]$ hdfs dfs -cat /user/hive/warehouse/t1/2.txt
+4000,Frank
+4001,Linda
+4002,Gigi
+4003,Wilson
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 4000     | Frank    |
+| 4001     | Linda    |
+| 4002     | Gigi     |
+| 4003     | Wilson   |
++----------+----------+
+4 rows selected (0.081 seconds)
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+[cloudera@cdh6 ~]$ vi 1.txt
+[cloudera@cdh6 ~]$ cat 1.txt
+1001,Jacky
+2001,Green
+
+[cloudera@cdh6 ~]$ hdfs dfs -put 1.txt /user/hive/warehouse/t1/
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+Found 2 items
+-rw-r--r--   1 cloudera hive         22 2020-09-17 15:21 /user/hive/warehouse/t1/1.txt
+-rw-r--r--   1 cloudera hive         44 2020-09-17 15:19 /user/hive/warehouse/t1/2.txt
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 1001     | Jacky    |
+| 2001     | Green    |
+| 4000     | Frank    |
+| 4001     | Linda    |
+| 4002     | Gigi     |
+| 4003     | Wilson   |
++----------+----------+
+6 rows selected (1.062 seconds)
+
+hive> create external table t2
+    > (col1 int,col2 varchar(10))
+    > row format delimited
+    > fields terminated by ','
+    > stored as textfile;
+OK
+Time taken: 0.055 seconds
+
+hive> desc formatted t2;
+OK
+# col_name              data_type               comment
+
+col1                    int
+col2                    varchar(10)
+
+# Detailed Table Information
+Database:               default
+Owner:                  cloudera
+CreateTime:             Thu Jun 27 19:06:51 PDT 2019
+LastAccessTime:         UNKNOWN
+Protect Mode:           None
+Retention:              0
+Location:               hdfs://cdh6:8020/user/hive/warehouse/t2
+Table Type:             EXTERNAL_TABLE                                                 --當此table被丟棄後,相對HDFS目錄與檔案將會保留,不會如同MANAGED_TABLE一樣被刪除
+Table Parameters:
+        COLUMN_STATS_ACCURATE   true
+        EXTERNAL                TRUE
+        numFiles                1
+        numRows                 3
+        rawDataSize             27
+        totalSize               30
+        transient_lastDdlTime   1561687623
+
+# Storage Information
+SerDe Library:          org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe
+InputFormat:            org.apache.hadoop.mapred.TextInputFormat
+OutputFormat:           org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat
+Compressed:             No
+Num Buckets:            -1
+Bucket Columns:         []
+Sort Columns:           []
+Storage Desc Params:
+        field.delim             ,
+        serialization.format    ,
+Time taken: 0.061 seconds, Fetched: 34 row(s)
+
+
+hive> insert into t2 select * from t1;
+Query ID = cloudera_20190627190707_9ca8d8f9-080f-4dbe-9a17-d888f0b9ff90
+Total jobs = 3
+Launching Job 1 out of 3
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Starting Spark Job = c10e3068-344c-409c-8bd9-2ff84c775353
+Running with YARN Application = application_1561597102466_0007
+Kill Command = /opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/hadoop/bin/yarn application -kill application_1561597102466_0007
+
+Query Hive on Spark job[1] stages:
+2
+
+Status: Running (Hive on Spark job[1])
+Job Progress Format
+CurrentTime StageId_StageAttemptId: SucceededTasksCount(+RunningTasksCount-FailedTasksCount)/TotalTasksCount [StageCost]
+2019-06-27 19:07:02,383 Stage-2_0: 0(+1)/1
+2019-06-27 19:07:03,387 Stage-2_0: 1/1 Finished
+Status: Finished successfully in 2.02 seconds
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Moving data to: hdfs://cdh6:8020/user/hive/warehouse/t2/.hive-staging_hive_2019-06-27_19-07-01_116_8516355000221888574-1/-ext-10000
+Loading data to table default.t2
+Table default.t2 stats: [numFiles=1, numRows=3, totalSize=30, rawDataSize=27]
+OK
+Time taken: 2.593 seconds
+hive>
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t2/
+Found 1 items
+-rwxrwxrwx   1 cloudera supergroup         30 2019-06-27 19:07 /user/hive/warehouse/t2/000000_0
+
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/cloudera/customers/
+Found 5 items
+-rw-r--r--   1 cloudera cloudera          0 2019-06-14 07:26 /user/cloudera/customers/_SUCCESS
+-rw-r--r--   1 cloudera cloudera     237145 2019-06-14 07:25 /user/cloudera/customers/part-m-00000
+-rw-r--r--   1 cloudera cloudera     237965 2019-06-14 07:25 /user/cloudera/customers/part-m-00001
+-rw-r--r--   1 cloudera cloudera     238092 2019-06-14 07:26 /user/cloudera/customers/part-m-00002
+-rw-r--r--   1 cloudera cloudera     240323 2019-06-14 07:26 /user/cloudera/customers/part-m-00003
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+hive> create external table t2
+    > row format delimited fields terminated by ','
+    > stored as textfile
+    > as select * from t1;
+FAILED: SemanticException [Error 10070]: CREATE-TABLE-AS-SELECT cannot create external table
+================================================================================================
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 1001     | Jacky    |
+| 2001     | Green    |
+| 4000     | Frank    |
+| 4001     | Linda    |
+| 4002     | Gigi     |
+| 4003     | Wilson   |
++----------+----------+
+6 rows selected (0.074 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+Found 2 items
+-rw-r--r--   1 cloudera supergroup         22 2020-09-17 15:33 /user/hive/warehouse/t1/1.txt
+-rw-r--r--   1 cloudera supergroup         44 2020-09-17 15:33 /user/hive/warehouse/t1/2.txt
+
+0: jdbc:hive2://cdh6:10000> insert into t1 values(5001,'Vivid');
+WARN  :
+1 row affected (15.056 seconds)
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 5001     | Vivid    |   --剛剛新增的資料
+| 1001     | Jacky    |
+| 2001     | Green    |
+| 4000     | Frank    |
+| 4001     | Linda    |
+| 4002     | Gigi     |
+| 4003     | Wilson   |
++----------+----------+
+7 rows selected (0.208 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+Found 3 items
+-rwxrwxrwt   1 cloudera hive               11 2020-09-17 15:46 /user/hive/warehouse/t1/000000_0   --新增資料變成一個新檔案
+-rw-r--r--   1 cloudera supergroup         22 2020-09-17 15:33 /user/hive/warehouse/t1/1.txt
+-rw-r--r--   1 cloudera supergroup         44 2020-09-17 15:33 /user/hive/warehouse/t1/2.txt
+[cloudera@cdh6 ~]$ hdfs dfs -cat /user/hive/warehouse/t1/000000_0
+5001,Vivid
+
+0: jdbc:hive2://cdh6:10000> insert into t1
+. . . . . . . . . . . . . > select empno,name from emp;   --之前範例已經建立emp表格(spark)
+WARN  :
+15 rows affected (17.516 seconds)
+15 rows affected (17.516 seconds)
+0: jdbc:hive2://cdh6:10000> select * from t1;
++----------+----------+
+| t1.col1  | t1.col2  |
++----------+----------+
+| 5001     | Vivid    |
+| 7839     | KING     |
+| 7698     | BLAKE    |
+| 7782     | CLARK    |
+| 7566     | JONES    |
+| 7788     | SCOTT    |
+| 7902     | FORD     |
+| 7369     | SMITH    |
+| 7499     | ALLEN    |
+| 7521     | WARD     |
+| 7654     | MARTIN   |
+| 7844     | TURNER   |
+| 7876     | ADAMS    |
+| 7900     | JAMES    |
+| 7934     | MILLER   |
+| 7901     | FRANK    |
+| 1001     | Jacky    |
+| 2001     | Green    |
+| 4000     | Frank    |
+| 4001     | Linda    |
+| 4002     | Gigi     |
+| 4003     | Wilson   |
++----------+----------+
+22 rows selected (0.247 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/t1/
+Found 4 items
+-rwxrwxrwt   1 cloudera hive               11 2020-09-17 15:46 /user/hive/warehouse/t1/000000_0
+-rwxrwxrwt   1 cloudera hive              165 2020-09-17 15:51 /user/hive/warehouse/t1/000000_0_copy_1 ----新增資料變成一個新檔案(但大小比較大,因為一次新增的資料筆數都放在同一個檔案裡)
+-rw-r--r--   1 cloudera supergroup         22 2020-09-17 15:33 /user/hive/warehouse/t1/1.txt
+-rw-r--r--   1 cloudera supergroup         44 2020-09-17 15:33 /user/hive/warehouse/t1/2.txt
+
+0: jdbc:hive2://cdh6:10000> delete from t1 where col1=5001;
+Error: Error while compiling statement: FAILED: SemanticException [Error 10294]: Attempt to do update or delete using transaction manager that does not support these operations. (state=42000,code=10294)
+================================================================================================
+[cloudera@cdh6 ~]$ hdfs dfs -cat /user/hive/warehouse/t3/t3_1.csv
+100,100
+1000,1000
+10000,10000
+
+hive> desc t3;
+OK
+col1                    tinyint
+col2                    int
+Time taken: 0.063 seconds, Fetched: 2 row(s)
+hive> select * from t3;
+OK
+100     100
+NULL    1000    --Hive資料超過欄位定義長度時,將以NULL呈現
+NULL    10000
+Time taken: 0.068 seconds, Fetched: 3 row(s)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+[cdh6:21000] > describe t3;
+Query: describe t3
++------+---------+---------+
+| name | type    | comment |
++------+---------+---------+
+| col1 | tinyint |         |
+| col2 | int     |         |
++------+---------+---------+
+Fetched 2 row(s) in 5.64s
+[cdh6:21000] > select * from t3;
+Query: select * from t3
+Query submitted at: 2020-04-10 20:58:10 (Coordinator: http://cdh6:25000)
+Query progress can be monitored at: http://cdh6:25000/query_plan?query_id=8342e5c825a2ac0c:3a002ea500000000
++------+-------+
+| col1 | col2  |
++------+-------+
+| 100  | 100   |
+| 127  | 1000  |   --Impala資料超過欄位定義長度時,將以欄位長度的最大值呈現
+| 127  | 10000 |
++------+-------+
+Fetched 3 row(s) in 1.15s
+
+================================================================================================
+hive> desc customers;
+OK
+customer_id             int
+customer_fname          string
+customer_lname          string
+customer_email          string
+customer_password       string
+customer_street         string
+customer_city           string
+customer_state          string
+customer_zipcode        string
+Time taken: 0.157 seconds, Fetched: 9 row(s)
+hive> select customer_city,count(*) custcount from customers group by customer_city having count(*) > 100 order by custcount desc;
+Query ID = cloudera_20200917164259_0108bf68-c5a0-4a52-b0ac-85fb514036dc
+Total jobs = 2                   --MapReduce將產生兩個job來完成上面SELECT敘述句的要求
+Launching Job 1 out of 2
+Number of reduce tasks not specified. Estimated from input data size: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+20/09/17 16:43:00 INFO client.RMProxy: Connecting to ResourceManager at cdh6/192.168.56.103:8032
+20/09/17 16:43:00 INFO client.RMProxy: Connecting to ResourceManager at cdh6/192.168.56.103:8032
+Starting Job = job_1600045559460_0034, Tracking URL = http://cdh6:8088/proxy/application_1600045559460_0034/
+Kill Command = /opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/lib/hadoop/bin/hadoop job  -kill job_1600045559460_0034
+Hadoop job information for Stage-1: number of mappers: 1; number of reducers: 1
+2020-09-17 16:43:08,644 Stage-1 map = 0%,  reduce = 0%
+2020-09-17 16:43:14,790 Stage-1 map = 100%,  reduce = 0%, Cumulative CPU 2.15 sec
+2020-09-17 16:43:19,909 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.02 sec
+MapReduce Total cumulative CPU time: 5 seconds 20 msec
+Ended Job = job_1600045559460_0034
+Launching Job 2 out of 2
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+20/09/17 16:43:21 INFO client.RMProxy: Connecting to ResourceManager at cdh6/192.168.56.103:8032
+20/09/17 16:43:21 INFO client.RMProxy: Connecting to ResourceManager at cdh6/192.168.56.103:8032
+Starting Job = job_1600045559460_0035, Tracking URL = http://cdh6:8088/proxy/application_1600045559460_0035/
+Kill Command = /opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/lib/hadoop/bin/hadoop job  -kill job_1600045559460_0035
+Hadoop job information for Stage-2: number of mappers: 1; number of reducers: 1
+2020-09-17 16:43:28,471 Stage-2 map = 0%,  reduce = 0%
+2020-09-17 16:43:32,603 Stage-2 map = 100%,  reduce = 0%, Cumulative CPU 1.43 sec
+2020-09-17 16:43:39,889 Stage-2 map = 100%,  reduce = 100%, Cumulative CPU 3.15 sec
+MapReduce Total cumulative CPU time: 3 seconds 150 msec
+Ended Job = job_1600045559460_0035
+MapReduce Jobs Launched:
+Stage-Stage-1: Map: 1  Reduce: 1   Cumulative CPU: 5.02 sec   HDFS Read: 963066 HDFS Write: 320 HDFS EC Read: 0 SUCCESS
+Stage-Stage-2: Map: 1  Reduce: 1   Cumulative CPU: 3.15 sec   HDFS Read: 5779 HDFS Write: 290 HDFS EC Read: 0 SUCCESS
+Total MapReduce CPU Time Spent: 8 seconds 170 msec
+OK
+Caguas  4584
+Chicago 274
+Brooklyn        225
+Los Angeles     224
+New York        120
+Philadelphia    105
+Bronx   105
+San Diego       104
+Time taken: 41.154 seconds, Fetched: 8 row(s)
+
+--將執行引擎變更為spark
+hive> set hive.execution.engine=spark;
+hive> select customer_city,count(*) custcount from customers group by customer_city having count(*) > 100 order by custcount desc;
+Query ID = cloudera_20200917164504_302438e1-9296-47d0-ac69-79ed3711a5a1
+Total jobs = 1
+Launching Job 1 out of 1           --只需要一個job,但此job將分成3個stage,stage之間為序列執行,stage之內為平行執行
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+Running with YARN Application = application_1600045559460_0036
+Kill Command = /opt/cloudera/parcels/CDH-6.3.2-1.cdh6.3.2.p0.1605554/lib/hadoop/bin/yarn application -kill application_1600045559460_0036
+Hive on Spark Session Web UI URL: http://cdh6:43905
+
+Query Hive on Spark job[0] stages: [0, 1, 2]
+Spark job[0] status = RUNNING
+--------------------------------------------------------------------------------------
+          STAGES   ATTEMPT        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED
+--------------------------------------------------------------------------------------
+Stage-0 ........         0      FINISHED      1          1        0        0       0
+Stage-1 ........         0      FINISHED      1          1        0        0       0
+Stage-2 ........         0      FINISHED      1          1        0        0       0
+--------------------------------------------------------------------------------------
+STAGES: 03/03    [==========================>>] 100%  ELAPSED TIME: 7.07 s
+--------------------------------------------------------------------------------------
+Spark job[0] finished successfully in 7.07 second(s)
+Spark Job[0] Metrics: TaskDurationTime: 3541, ExecutorCpuTime: 1676, JvmGCTime: 109, BytesRead / RecordsRead: 958805 / 12435, BytesReadEC: 0, ShuffleTotalBytesRead / ShuffleRecordsRead: 10605 / 570, ShuffleBytesWritten / ShuffleRecordsWritten: 10605 / 570
+OK
+Caguas  4584
+Chicago 274
+Brooklyn        225
+Los Angeles     224
+New York        120
+Bronx   105
+Philadelphia    105
+San Diego       104
+Time taken: 23.54 seconds, Fetched: 8 row(s)  --執行時間有點長
+
+--再次執行
+hive> select customer_city,count(*) custcount from customers group by customer_city having count(*) > 100 order by custcount desc;
+Query ID = cloudera_20200917164541_180f4e07-1a09-47e0-90b9-811b7a3ace36
+Total jobs = 1
+Launching Job 1 out of 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+--------------------------------------------------------------------------------------
+          STAGES   ATTEMPT        STATUS  TOTAL  COMPLETED  RUNNING  PENDING  FAILED
+--------------------------------------------------------------------------------------
+Stage-3 ........         0      FINISHED      1          1        0        0       0
+Stage-4 ........         0      FINISHED      1          1        0        0       0
+Stage-5 ........         0      FINISHED      1          1        0        0       0
+--------------------------------------------------------------------------------------
+STAGES: 03/03    [==========================>>] 100%  ELAPSED TIME: 2.01 s
+--------------------------------------------------------------------------------------
+Spark job[1] finished successfully in 2.01 second(s)
+Spark Job[1] Metrics: TaskDurationTime: 761, ExecutorCpuTime: 210, JvmGCTime: 0, BytesRead / RecordsRead: 959721 / 12435, BytesReadEC: 0, ShuffleTotalBytesRead / ShuffleRecordsRead: 10605 / 570, ShuffleBytesWritten / ShuffleRecordsWritten: 10605 / 570
+OK
+Caguas  4584
+Chicago 274
+Brooklyn        225
+Los Angeles     224
+New York        120
+Bronx   105
+Philadelphia    105
+San Diego       104
+Time taken: 2.126 seconds, Fetched: 8 row(s)  --執行時間明顯短許多,因為spark的executor未被收回,此時繼續使用之前所配置的資源來執行新指令
+
+
+[cloudera@cdh6 ~]$ hdfs dfs -put emp1.csv /user/hive/warehouse/emp
+
+0: jdbc:hive2://localhost:10000> select empno,mgr from emp;
+INFO  : Compiling command(queryId=hive_20190627204646_fa8a364f-ed57-40c4-993d-66b23ad06feb): select empno,mgr from emp
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:empno, type:decimal(4,0), comment:null), FieldSchema(name:mgr, type:decimal(4,0), comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20190627204646_fa8a364f-ed57-40c4-993d-66b23ad06feb); Time taken: 0.078 seconds
+INFO  : Executing command(queryId=hive_20190627204646_fa8a364f-ed57-40c4-993d-66b23ad06feb): select empno,mgr from emp
+INFO  : Completed executing command(queryId=hive_20190627204646_fa8a364f-ed57-40c4-993d-66b23ad06feb); Time taken: 0.003 seconds
+INFO  : OK
++--------+-------+--+
+| empno  |  mgr  |
++--------+-------+--+
+| 7839   | NULL  |     --NULL就是沒有任何資料存在,不是0或空白
+| 7698   | 7839  |
+| 7782   | 7839  |
+| 7566   | 7839  |
+| 7788   | 7566  |
+| 7902   | 7566  |
+| 7369   | 7902  |
+| 7499   | 7698  |
+| 7521   | 7698  |
+| 7654   | 7698  |
+| 7844   | 7698  |
+| 7876   | 7788  |
+| 7900   | 7698  |
+| 7934   | 7782  |
++--------+-------+--+
+14 rows selected (0.135 seconds)
+
+[cloudera@cdh6 ~]$ cat emp1.csv
+7839,KING,PRESIDENT,,17-NOV-81,5000,,10
+7698,BLAKE,MANAGER,7839,01-MAY-81,2850,,30
+7782,CLARK,MANAGER,7839,09-JUN-81,2450,,10
+7566,JONES,MANAGER,7839,02-APR-81,2975,,20
+7788,SCOTT,ANALYST,7566,19-APR-87,3000,,20
+7902,FORD,ANALYST,7566,03-DEC-81,3000,,20
+7369,SMITH,CLERK,7902,17-DEC-80,800,,20
+7499,ALLEN,SALESMAN,7698,20-FEB-81,1600,300,30
+7521,WARD,SALESMAN,7698,22-FEB-81,1250,500,30
+7654,MARTIN,SALESMAN,7698,28-SEP-81,1250,1400,30
+7844,TURNER,SALESMAN,7698,08-SEP-81,1500,0,30
+7876,ADAMS,CLERK,7788,23-MAY-87,1100,,20
+7900,JAMES,CLERK,7698,03-DEC-81,950,,30
+7934,MILLER,CLERK,7782,23-JAN-82,1300,,10
+
+--顯示每一筆row的job欄位值
+0: jdbc:hive2://localhost:10000> select job from emp;
+                              -- select ALL job from emp;
+INFO  : Compiling command(queryId=hive_20190627205151_573e4127-7042-4f05-ae4d-19cedddd1be5): select job from emp
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:job, type:varchar(9), comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20190627205151_573e4127-7042-4f05-ae4d-19cedddd1be5); Time taken: 0.059 seconds
+INFO  : Executing command(queryId=hive_20190627205151_573e4127-7042-4f05-ae4d-19cedddd1be5): select job from emp
+INFO  : Completed executing command(queryId=hive_20190627205151_573e4127-7042-4f05-ae4d-19cedddd1be5); Time taken: 0.002 seconds
+INFO  : OK
++------------+--+
+|    job     |
++------------+--+
+| PRESIDENT  |
+| MANAGER    |
+| MANAGER    |
+| MANAGER    |
+| ANALYST    |
+| ANALYST    |
+| CLERK      |
+| SALESMAN   |
+| SALESMAN   |
+| SALESMAN   |
+| SALESMAN   |
+| CLERK      |
+| CLERK      |
+| CLERK      |
++------------+--+
+14 rows selected (0.145 seconds)
+
+--顯示員工中有哪不同的工作
+0: jdbc:hive2://localhost:10000> select DISTINCT job from emp;
+INFO  : Compiling command(queryId=hive_20190627205353_27ebc659-4e50-4065-81ec-1d1188f99ab0): select DISTINCT job from emp
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:job, type:varchar(9), comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20190627205353_27ebc659-4e50-4065-81ec-1d1188f99ab0); Time taken: 0.236 seconds
+INFO  : Executing command(queryId=hive_20190627205353_27ebc659-4e50-4065-81ec-1d1188f99ab0): select DISTINCT job from emp
+INFO  : Query ID = hive_20190627205353_27ebc659-4e50-4065-81ec-1d1188f99ab0
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : Starting Spark Job = 2e3e8e7b-fb8b-48cf-af13-27c51042362a
+INFO  : Running with YARN Application = application_1561597102466_0009
+INFO  : Kill Command = /opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/hadoop/bin/yarn application -kill application_1561597102466_0009
+INFO  :
+Query Hive on Spark job[1] stages:
+INFO  : 1
+INFO  : 2
+INFO  :
+Status: Running (Hive on Spark job[1])
+INFO  : Job Progress Format
+CurrentTime StageId_StageAttemptId: SucceededTasksCount(+RunningTasksCount-FailedTasksCount)/TotalTasksCount [StageCost]
+INFO  : 2019-06-27 20:53:56,113 Stage-1_0: 0(+1)/1      Stage-2_0: 0/1
+INFO  : 2019-06-27 20:53:57,120 Stage-1_0: 1/1 Finished Stage-2_0: 1/1 Finished
+INFO  : Status: Finished successfully in 2.02 seconds
+INFO  : =====Spark Job[2e3e8e7b-fb8b-48cf-af13-27c51042362a] statistics=====
+INFO  : HIVE
+INFO  :         CREATED_FILES: 1
+INFO  :         DESERIALIZE_ERRORS: 0
+INFO  :         RECORDS_OUT_INTERMEDIATE: 5
+INFO  :         RECORDS_IN: 14
+INFO  :         RECORDS_OUT_0: 5
+INFO  : Spark Job[2e3e8e7b-fb8b-48cf-af13-27c51042362a] Metrics
+INFO  :         ExecutorDeserializeTime: 147
+INFO  :         ExecutorRunTime: 672
+INFO  :         ResultSize: 3537
+INFO  :         JvmGCTime: 26
+INFO  :         ResultSerializationTime: 1
+INFO  :         MemoryBytesSpilled: 0
+INFO  :         DiskBytesSpilled: 0
+INFO  :         BytesRead: 4107
+INFO  :         RemoteBlocksFetched: 0
+INFO  :         LocalBlocksFetched: 1
+INFO  :         TotalBlocksFetched: 1
+INFO  :         FetchWaitTime: 0
+INFO  :         RemoteBytesRead: 0
+INFO  :         ShuffleBytesWritten: 140
+INFO  :         ShuffleWriteTime: 9804001
+INFO  : Execution completed successfully
+INFO  : Completed executing command(queryId=hive_20190627205353_27ebc659-4e50-4065-81ec-1d1188f99ab0); Time taken: 2.234 seconds
+INFO  : OK
++------------+--+
+|    job     |
++------------+--+
+| ANALYST    |
+| SALESMAN   |
+| PRESIDENT  |
+| MANAGER    |
+| CLERK      |
++------------+--+
+5 rows selected (2.521 seconds)
+0: jdbc:hive2://localhost:10000>
+
+0: jdbc:hive2://localhost:10000> select job
+. . . . . . . . . . . . . . . .> from emp
+. . . . . . . . . . . . . . . .> where deptno=20;
+INFO  : Compiling command(queryId=hive_20190627205959_18d33431-cd72-4d29-9f97-6c031dfb09e1): select job
+from emp
+where deptno=20
+INFO  : Semantic Analysis Completed
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:job, type:varchar(9), comment:null)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20190627205959_18d33431-cd72-4d29-9f97-6c031dfb09e1); Time taken: 0.081 seconds
+INFO  : Executing command(queryId=hive_20190627205959_18d33431-cd72-4d29-9f97-6c031dfb09e1): select job
+from emp
+where deptno=20
+INFO  : Query ID = hive_20190627205959_18d33431-cd72-4d29-9f97-6c031dfb09e1
+INFO  : Total jobs = 1
+INFO  : Launching Job 1 out of 1
+INFO  : Starting task [Stage-1:MAPRED] in serial mode
+INFO  : In order to change the average load for a reducer (in bytes):
+INFO  :   set hive.exec.reducers.bytes.per.reducer=<number>
+INFO  : In order to limit the maximum number of reducers:
+INFO  :   set hive.exec.reducers.max=<number>
+INFO  : In order to set a constant number of reducers:
+INFO  :   set mapreduce.job.reduces=<number>
+INFO  : Starting Spark Job = df85d43a-7bcc-4206-9e52-c17a77ba27ac
+INFO  : 2019-06-27 20:59:12,572 Stage-4_0: 1/1 Finished
+INFO  : Status: Finished successfully in 1.00 seconds
+INFO  : =====Spark Job[df85d43a-7bcc-4206-9e52-c17a77ba27ac] statistics=====
+INFO  : HIVE
+INFO  :         CREATED_FILES: 1
+INFO  :         DESERIALIZE_ERRORS: 0
+INFO  :         RECORDS_IN: 14
+INFO  :         RECORDS_OUT_0: 5
+INFO  : Spark Job[df85d43a-7bcc-4206-9e52-c17a77ba27ac] Metrics
+INFO  :         ExecutorDeserializeTime: 22
+INFO  :         ExecutorRunTime: 215
+INFO  :         ResultSize: 2107
+INFO  :         JvmGCTime: 28
+INFO  :         ResultSerializationTime: 0
+INFO  :         MemoryBytesSpilled: 0
+INFO  :         DiskBytesSpilled: 0
+INFO  :         BytesRead: 5245
+INFO  : Execution completed successfully
+INFO  : Completed executing command(queryId=hive_20190627205959_18d33431-cd72-4d29-9f97-6c031dfb09e1); Time taken: 1.164 seconds
+INFO  : OK
++----------+--+
+|   job    |
++----------+--+
+| MANAGER  |
+| ANALYST  |
+| ANALYST  |
+| CLERK    |
+| CLERK    |
++----------+--+
+5 rows selected (1.29 seconds)
+
+--計算整個員工表格裡有幾筆row
+0: jdbc:hive2://localhost:10000> select count(*) from emp;
++------+--+
+| _c0  |
++------+--+
+| 14   |
++------+--+
+1 row selected (1.344 seconds)
+
+--count(sal) ->整個員工表格裡,有幾筆row的sal欄位值為非空值
+--count(comm) ->整個員工表格裡,有幾筆row的comm欄位值為非空值
+0: jdbc:hive2://localhost:10000> select count(*),count(sal),count(comm) from emp;
++------+------+------+--+
+| _c0  | _c1  | _c2  |
++------+------+------+--+
+| 14   | 14   | 4    |
++------+------+------+--+
+
+0: jdbc:hive2://localhost:10000> select comm from emp;
++-------+--+
+| comm  |
++-------+--+
+| NULL  |
+| NULL  |
+| NULL  |
+| NULL  |
+| NULL  |
+| NULL  |
+| NULL  |
+| 300   |
+| 500   |
+| 1400  |
+| 0     |
+| NULL  |
+| NULL  |
+| NULL  |
++-------+--+
+14 rows selected (0.096 seconds)
+
+--count(comm) = count(ALL comm)
+--count(DISTINCT comm)
+0: jdbc:hive2://localhost:10000> select distinct comm from emp;
++-------+--+
+| comm  |
++-------+--+
+| 300   |
+| NULL  |    --DISTINCT操作,NULL也算一種
+| 0     |
+| 500   |
+| 1400  |
++-------+--+
+5 rows selected (2.293 seconds)
+
+0: jdbc:hive2://localhost:10000> select count(comm),count(distinct comm) from emp;
++------+------+--+
+| _c0  | _c1  |
++------+------+--+
+| 4    | 4    |
++------+------+--+
+1 row selected (2.316 seconds)
+
+0: jdbc:hive2://localhost:10000> select sum(comm),avg(comm),count(*),count(comm) from emp;
++-------+------+------+------+--+
+|  _c0  | _c1  | _c2  | _c3  |
++-------+------+------+------+--+
+| 2200  | 550  | 14   | 4    |
++-------+------+------+------+--+
+
+--所有comm為非空值的員工,他們的平均comm
+avg(comm) = 2200/4 = sum(comm)/count(comm)
+
+
+--以全部員工當作分母,必須先使用NVL函數將空值轉換為0
+0: jdbc:hive2://localhost:10000> select sum(nvl(comm,0)),avg(nvl(comm,0)),count(*),count(nvl(comm,0)) from emp;
++-------+-------------+------+------+--+
+|  _c0  |     _c1     | _c2  | _c3  |
++-------+-------------+------+------+--+
+| 2200  | 157.142857  | 14   | 14   |
++-------+-------------+------+------+--+
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+--使用sqoop匯入scott.dept到hive default資料庫
+sqoop import --connect jdbc:mysql://quickstart/scott --username root --password cloudera --table dept --split-by deptno \
+             --hive-import --create-hive-table --hive-database default --warehouse-dir /user/hive/warehouse
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+0: jdbc:hive2://quickstart:10000> desc dept;
++-----------+------------+----------+--+
+| col_name  | data_type  | comment  |
++-----------+------------+----------+--+
+| deptno    | double     |          |
+| dname     | string     |          |
+| loc       | string     |          |
++-----------+------------+----------+--+
+
+0: jdbc:hive2://quickstart:10000> select e.name,d.dname
+. . . . . . . . . . . . . . . . > from emp e join dept d on (e.deptno=d.deptno);
+                                --from emp e,dept d where e.deptno=d.deptno與上面相同,沒有效能差異
++---------+-------------+--+
+| e.name  |   d.dname   |
++---------+-------------+--+
+| KING    | ACCOUNTING  |
+| BLAKE   | SALES       |
+| CLARK   | ACCOUNTING  |
+| JONES   | RESEARCH    |
+| SCOTT   | RESEARCH    |
+| FORD    | RESEARCH    |
+| SMITH   | RESEARCH    |
+| ALLEN   | SALES       |
+| WARD    | SALES       |
+| MARTIN  | SALES       |
+| TURNER  | SALES       |
+| ADAMS   | RESEARCH    |
+| JAMES   | SALES       |
+| MILLER  | ACCOUNTING  |
++---------+-------------+--+
+14 rows selected (21.144 seconds)
+
+
+0: jdbc:hive2://localhost:10000> create table wordcount
+. . . . . . . . . . . . . . . .> (line string)
+. . . . . . . . . . . . . . . .> row format delimited
+. . . . . . . . . . . . . . . .> stored as textfile;
+
+[cloudera@cdh6 ~]$ cat file1.txt
+Hello Frank
+Hello Hadoop
+Hello Spark
+Hi Frank!
+Good Afternoon Everyone.
+
+[cloudera@cdh6 ~]$ hdfs dfs -put file1.txt /user/hive/warehouse/wordcount/
+
+0: jdbc:hive2://localhost:10000> select * from wordcount;
++---------------------------+--+
+|      wordcount.line       |
++---------------------------+--+
+| Hello Frank               |
+| Hello Hadoop              |
+| Hello Spark               |
+| Hi Frank!                 |
+| Good Afternoon Everyone.  |
++---------------------------+--+
+5 rows selected (0.436 seconds)
+
+0: jdbc:hive2://localhost:10000> select count(*) from wordcount;
++------+--+
+| _c0  |
++------+--+
+| 5    |
++------+--+
+
+--split僅以空白分割string為多個新元素
+0: jdbc:hive2://localhost:10000> select split(line,' ') from wordcount;
++-----------------------------------+--+
+|                _c0                |
++-----------------------------------+--+
+| ["Hello","Frank"]                 |
+| ["Hello","Hadoop"]                |
+| ["Hello","Spark"]                 |
+| ["Hi","Frank!"]                   |
+| ["Good","Afternoon","Everyone."]  |
++-----------------------------------+--+
+5 rows selected (2.258 seconds)
+
+--explode類似core spark的flatMap,可以將一個element變成多個element
+0: jdbc:hive2://localhost:10000> select explode(split(line,' ')) word from wordcount;
++------------+--+
+|    word    |
++------------+--+
+| Hello      |
+| Frank      |
+| Hello      |
+| Hadoop     |
+| Hello      |
+| Spark      |
+| Hi         |
+| Frank!     |  --split不會自動過濾掉標點符號
+| Good       |
+| Afternoon  |
+| Everyone.  |
++------------+--+
+11 rows selected (1.317 seconds)
+
+0: jdbc:hive2://localhost:10000> select explode(sentences(line)) word from wordcount;
++------------------------------------+--+
+|                word                |
++------------------------------------+--+
+| [["Hello","Frank"]]                |
+| [["Hello","Hadoop"]]               |
+| [["Hello","Spark"]]                |
+| [["Hi","Frank"]]                   |   --sentences會自動移除標點符號,但其結果為array<array<>>
+| [["Good","Afternoon","Everyone"]]  |
++------------------------------------+--+
+5 rows selected (2.215 seconds)
+
+0: jdbc:hive2://cdh6:10000> select explode(explode(sentences(line))) word from wordcount;
+Error: Error while compiling statement: FAILED: SemanticException [Error 10081]: UDTF's are not supported outside the SELECT clause, nor nested in expressions (state=42000,code=10081)
+--UDTF(User Defined Table Function)
+
+0: jdbc:hive2://localhost:10000> select explode(word) from (select explode(sentences(line,' ')) word from wordcount) wordtmp;
++------------+--+
+|    col     |
++------------+--+
+| Hello      |
+| Frank      |
+| Hello      |
+| Hadoop     |
+| Hello      |
+| Spark      |
+| Hi         |
+| Frank      |
+| Good       |
+| Afternoon  |
+| Everyone   |
++------------+--+
+11 rows selected (1.237 seconds)
+
+0: jdbc:hive2://localhost:10000> select word,count(*) word_count
+. . . . . . . . . . . . . . . .> from (select explode(split(line,' ')) word from wordcount) word_temp --請注意要加上表格別名與欄位別名
+. . . . . . . . . . . . . . . .> group by word
+. . . . . . . . . . . . . . . .> order by word_count desc;
++------------+-------------+--+
+|    word    | word_count  |
++------------+-------------+--+
+| Hello      | 3           |
+| Spark      | 1           |
+| Everyone.  | 1           | --.沒有移除
+| Frank      | 1           |
+| Good       | 1           |
+| Afternoon  | 1           |
+| Hi         | 1           |
+| Frank!     | 1           | --應該與Frank屬於同一個字才對
+| Hadoop     | 1           |
++------------+-------------+--+
+9 rows selected (2.487 seconds)
+
+0: jdbc:hive2://localhost:10000> select word,count(*) word_count
+. . . . . . . . . . . . . . . .> from (select explode(word) word from (select explode(sentences(line,' ')) word from wordcount) wordtmp1) wordtmp2
+. . . . . . . . . . . . . . . .> group by word
+. . . . . . . . . . . . . . . .> order by word_count desc;
+
++------------+-------------+--+
+|    word    | word_count  |
++------------+-------------+--+
+| Hello      | 3           |
+| Frank      | 2           | --如此便正確了
+| Spark      | 1           |
+| Everyone   | 1           |
+| Good       | 1           |
+| Afternoon  | 1           |
+| Hi         | 1           |
+| Hadoop     | 1           |
++------------+-------------+--+
+8 rows selected (2.251 seconds)
+
+--避免大小寫被當作不同字
+0: jdbc:hive2://localhost:10000> select word,count(*) word_count
+. . . . . . . . . . . . . . . .> from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from wordcount) wordtmp1) wordtmp2
+. . . . . . . . . . . . . . . .> group by word
+. . . . . . . . . . . . . . . .> order by word_count desc;
+
++------------+-------------+
+|    word    | word_count  |
++------------+-------------+
+| HELLO      | 3           |
+| FRANK      | 2           |
+| EVERYONE   | 1           |
+| HADOOP     | 1           |
+| GOOD       | 1           |
+| SPARK      | 1           |
+| HI         | 1           |
+| AFTERNOON  | 1           |
++------------+-------------+
+8 rows selected (1.17 seconds)
+
+--如何分析shakespeare.txt
+0: jdbc:hive2://cdh6:10000> create table docs
+. . . . . . . . . . . . . > (line string)
+. . . . . . . . . . . . . > row format delimited
+. . . . . . . . . . . . . > stored as textfile;
+No rows affected (0.062 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -put shakespeare.txt /user/hive/warehouse/docs/
+
+0: jdbc:hive2://quickstart:10000> select count(*) from docs;
++---------+--+
+|   _c0   |
++---------+--+
+| 124376  |
++---------+--+
+1 row selected (1.168 seconds)
+0: jdbc:hive2://quickstart:10000> select line from docs limit 1;
++----------------------------------------------------+--+
+|                        line                        |
++----------------------------------------------------+--+
+| The Project Gutenberg EBook of The Complete Works of William Shakespeare, by  |
++----------------------------------------------------+--+
+1 row selected (0.065 seconds)
+0: jdbc:hive2://quickstart:10000> select split(line,' ') word from docs limit 1;
++----------------------------------------------------+--+
+|                        word                        |
++----------------------------------------------------+--+
+| ["The","Project","Gutenberg","EBook","of","The","Complete","Works","of","William","Shakespeare,","by",""] |
++----------------------------------------------------+--+
+1 row selected (1.145 seconds)
+
+0: jdbc:hive2://quickstart:10000> select word,count(*) word_count
+. . . . . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
+. . . . . . . . . . . . . . . . > group by word
+. . . . . . . . . . . . . . . . > order by word_count desc
+. . . . . . . . . . . . . . . . > limit 20;
++-------+-------------+
+| word  | word_count  |
++-------+-------------+
+| THE   | 27578       |
+| AND   | 26690       |
+| I     | 20684       |
+| TO    | 19152       |
+| OF    | 18115       |
+| A     | 14599       |
+| YOU   | 13619       |
+| MY    | 12481       |
+| THAT  | 11110       |
+| IN    | 10957       |
+| IS    | 9569        |
+| NOT   | 8714        |
+| FOR   | 8211        |
+| WITH  | 7989        |
+| ME    | 7770        |
+| IT    | 7681        |
+| BE    | 7074        |
+| YOUR  | 6871        |
+| HIS   | 6857        |
+| THIS  | 6819        |
++-------+-------------+
+20 rows selected (3.166 seconds)
+
+0: jdbc:hive2://cdh6:10000> create table stopwords
+. . . . . . . . . . . . . > (word string)
+. . . . . . . . . . . . . > row format delimited
+. . . . . . . . . . . . . > stored as textfile;
+No rows affected (0.068 seconds)
+
+[cloudera@cdh6 ~]$ curl -O http://10.0.1.100:5050/Class_log/stopwords.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   170  100   170    0     0  19815      0 --:--:-- --:--:-- --:--:-- 21250
+[cloudera@cdh6 ~]$ hdfs dfs -put stopwords.txt /user/hive/warehouse/stopwords/
+
+--套用停用詞
+0: jdbc:hive2://cdh6:10000> select word,count(*) word_count
+. . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
+. . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
+. . . . . . . . . . . . . > group by word
+. . . . . . . . . . . . . > order by word_count desc
+. . . . . . . . . . . . . > limit 20;
++--------+-------------+
+|  word  | word_count  |
++--------+-------------+
+| THOU   | 5487        |
+| THY    | 4032        |
+| SHALL  | 3591        |
+| THEE   | 3178        |
+| LORD   | 3060        |
+| KING   | 2862        |
+| GOOD   | 2814        |
+| SIR    | 2759        |
+| O      | 2609        |
+| COME   | 2512        |
+| WOULD  | 2293        |
+| WELL   | 2154        |
+| LET    | 2101        |
+| ENTER  | 2099        |
+| LOVE   | 2054        |
+| HATH   | 1941        |
+| MAY    | 1850        |
+| MAN    | 1835        |
+| ONE    | 1780        |
+| I'LL   | 1743        |
++--------+-------------+
+20 rows selected (6.322 seconds)
+
+0: jdbc:hive2://cdh6:10000> select word,count(*) word_count
+. . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
+. . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
+. . . . . . . . . . . . . > group by word
+. . . . . . . . . . . . . > order by word_count desc
+. . . . . . . . . . . . . > limit 20,20;                      --跳過前20筆,讀取下面20筆
++--------+-------------+
+|  word  | word_count  |
++--------+-------------+
+| I'LL   | 1743        |
+| GO     | 1734        |
+| UPON   | 1731        |
+| LIKE   | 1702        |
+| SAY    | 1681        |
+| KNOW   | 1647        |
+| MAKE   | 1629        |
+| US     | 1619        |
+| YET    | 1570        |
+| MUST   | 1491        |
+| SEE    | 1439        |
+| TIS    | 1408        |
+| GIVE   | 1328        |
+| TIME   | 1263        |
+| TAKE   | 1197        |
+| SPEAK  | 1165        |
+| MINE   | 1162        |
+| FIRST  | 1160        |
+| TH     | 1148        |
+| DUKE   | 1071        |
++--------+-------------+
+20 rows selected (4.791 seconds)
+
+0: jdbc:hive2://cdh6:10000> select word,count(*) word_count
+. . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
+. . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
+. . . . . . . . . . . . . > group by word
+. . . . . . . . . . . . . > order by word_count desc
+. . . . . . . . . . . . . > limit 40,20;
++---------+-------------+
+|  word   | word_count  |
++---------+-------------+
+| TELL    | 1059        |
+| MUCH    | 1035        |
+| EXEUNT  | 1035        |
+| THINK   | 1024        |
+| NEVER   | 1011        |
+| EXIT    | 984         |
+| HEART   | 983         |
+| QUEEN   | 944         |
+| DOTH    | 939         |
+| ART     | 915         |
+| GREAT   | 899         |
+| HEAR    | 871         |
+| LADY    | 864         |
+| DEATH   | 859         |
+| AWAY    | 858         |
+| MEN     | 850         |
+| WORLD   | 841         |
+| HAND    | 838         |
+| FATHER  | 836         |
+| LIFE    | 834         |
++---------+-------------+
+20 rows selected (4.214 seconds)
+
+0: jdbc:hive2://cdh6:10000> select word,count(*) word_count
+. . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
+. . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
+. . . . . . . . . . . . . > group by word
+. . . . . . . . . . . . . > having count(*)>500
+. . . . . . . . . . . . . > order by word_count desc
+. . . . . . . . . . . . . > limit 20;
++--------+-------------+
+|  word  | word_count  |
++--------+-------------+
+| THOU   | 5487        |
+| THY    | 4032        |
+| SHALL  | 3591        |
+| THEE   | 3178        |
+| LORD   | 3060        |
+| KING   | 2862        |
+| GOOD   | 2814        |
+| SIR    | 2759        |
+| O      | 2609        |
+| COME   | 2512        |
+| WOULD  | 2293        |
+| WELL   | 2154        |
+| LET    | 2101        |
+| ENTER  | 2099        |
+| LOVE   | 2054        |
+| HATH   | 1941        |
+| MAY    | 1850        |
+| MAN    | 1835        |
+| ONE    | 1780        |
+| I'LL   | 1743        |
++--------+-------------+
+20 rows selected (6.051 seconds)
+
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+--Hive Table Update(orc format+buckets+table properties+hive transaction configurations)
+hive> set hive.support.concurrency=true;
+hive> set hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
+hive> set hive.enforce.bucketing=true;
+hive> set hive.exec.dynamic.partition.mode=nonstrict;
+hive> set hive.compactor.initiator.on=true;
+hive> set hive.compactor.worker.threads=1;
+
+0: jdbc:hive2://cdh6:10000> CREATE TABLE t1_orc_bucket (
+. . . . . . . . . . . . . >   col1                int,
+. . . . . . . . . . . . . >   col2              string
+. . . . . . . . . . . . . > )
+. . . . . . . . . . . . . > CLUSTERED BY (col1) INTO 3 BUCKETS STORED AS ORC                        --此屬性必須設定
+. . . . . . . . . . . . . > TBLPROPERTIES ("transactional"="true",                                  --此屬性必須設定
+. . . . . . . . . . . . . >   "compactor.mapreduce.map.memory.mb"="2048",                           --此屬性必須設定
+. . . . . . . . . . . . . >   "compactorthreshold.hive.compactor.delta.num.threshold"="4",          --此屬性必須設定
+. . . . . . . . . . . . . >   "compactorthreshold.hive.compactor.delta.pct.threshold"="0.5"         --此屬性必須設定                                                    
+. . . . . . . . . . . . . > );
+No rows affected (0.063 seconds)
+0: jdbc:hive2://cdh6:10000> insert into t1_orc_bucket select * from t1;
+WARN  :
+8 rows affected (23.702 seconds)
+0: jdbc:hive2://cdh6:10000> desc formatted t1_orc_bucket;
++-------------------------------+----------------------------------------------------+-----------------------+
+|           col_name            |                     data_type                      |        comment        |
++-------------------------------+----------------------------------------------------+-----------------------+
+| # col_name                    | data_type                                          | comment               |
+|                               | NULL                                               | NULL                  |
+| col1                          | int                                                |                       |
+| col2                          | string                                             |                       |
+|                               | NULL                                               | NULL                  |
+| # Detailed Table Information  | NULL                                               | NULL                  |
+| Database:                     | db1                                                | NULL                  |
+| OwnerType:                    | USER                                               | NULL                  |
+| Owner:                        | cloudera                                           | NULL                  |
+| CreateTime:                   | Fri Sep 18 09:43:21 CST 2020                       | NULL                  |
+| LastAccessTime:               | UNKNOWN                                            | NULL                  |
+| Retention:                    | 0                                                  | NULL                  |
+| Location:                     | hdfs://cdh6:8020/user/hive/warehouse/db1.db/t1_orc_bucket | NULL                  |
+| Table Type:                   | MANAGED_TABLE                                      | NULL                  |
+| Table Parameters:             | NULL                                               | NULL                  |
+|                               | compactor.mapreduce.map.memory.mb                  | 2048                  |
+|                               | compactorthreshold.hive.compactor.delta.num.threshold | 4                     |
+|                               | compactorthreshold.hive.compactor.delta.pct.threshold | 0.5                   |
+|                               | numFiles                                           | 3                     |
+|                               | numRows                                            | 0                     |
+|                               | rawDataSize                                        | 0                     |
+|                               | totalSize                                          | 2088                  |
+|                               | transactional                                      | true                  |
+|                               | transient_lastDdlTime                              | 1600393439            |
+|                               | NULL                                               | NULL                  |
+| # Storage Information         | NULL                                               | NULL                  |
+| SerDe Library:                | org.apache.hadoop.hive.ql.io.orc.OrcSerde          | NULL                  |
+| InputFormat:                  | org.apache.hadoop.hive.ql.io.orc.OrcInputFormat    | NULL                  |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat   | NULL                  |
+| Compressed:                   | No                                                 | NULL                  |
+| Num Buckets:                  | 3                                                  | NULL                  |
+| Bucket Columns:               | [col1]                                             | NULL                  |
+| Sort Columns:                 | []                                                 | NULL                  |
+| Storage Desc Params:          | NULL                                               | NULL                  |
+|                               | serialization.format                               | 1                     |
++-------------------------------+----------------------------------------------------+-----------------------+
+35 rows selected (0.228 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000003_0000003_0000/
+Found 3 items
+-rw-r--r--   1 cloudera hive        718 2020-09-18 09:43 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000003_0000003_0000/bucket_00000
+-rw-r--r--   1 cloudera hive        702 2020-09-18 09:43 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000003_0000003_0000/bucket_00001
+-rw-r--r--   1 cloudera hive        668 2020-09-18 09:43 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000003_0000003_0000/bucket_00002
+
+0: jdbc:hive2://cdh6:10000> select * from t1_orc_bucket;
++---------------------+---------------------+
+| t1_orc_bucket.col1  | t1_orc_bucket.col2  |
++---------------------+---------------------+
+| 7902                | FORD                |   <--將對其進行異動
+| 7788                | SCOTT               |
+| 7566                | JONES               |
+| 7782                | CLARK               |
+| 7839                | KING                |
+| 7876                | ADAMS               |
+| 7369                | SMITH               |
+| 7934                | MILLER              |
++---------------------+---------------------+
+8 rows selected (0.121 seconds)
+0: jdbc:hive2://cdh6:10000> update t1_orc_bucket
+. . . . . . . . . . . . . > set col2='Frank'
+. . . . . . . . . . . . . > where col1=7902;
+WARN  :
+1 row affected (24.555 seconds)
+0: jdbc:hive2://cdh6:10000> select * from t1_orc_bucket;
++---------------------+---------------------+
+| t1_orc_bucket.col1  | t1_orc_bucket.col2  |
++---------------------+---------------------+
+| 7902                | Frank               |  <--已經FORD變更為Frank
+| 7788                | SCOTT               |  <--將被刪除的row
+| 7566                | JONES               |
+| 7782                | CLARK               |
+| 7839                | KING                |
+| 7876                | ADAMS               |
+| 7369                | SMITH               |  <--將被刪除的row
+| 7934                | MILLER              |
++---------------------+---------------------+
+8 rows selected (0.244 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000004_0000004_0000/
+Found 1 items
+-rw-r--r--   1 cloudera hive        678 2020-09-18 09:46 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000004_0000004_0000/bucket_00000
+
+0: jdbc:hive2://cdh6:10000> delete from t1_orc_bucket
+. . . . . . . . . . . . . > where col2 like 'S%';
+WARN  :
+2 rows affected (25.452 seconds)
+0: jdbc:hive2://cdh6:10000> select * from t1_orc_bucket;
++---------------------+---------------------+
+| t1_orc_bucket.col1  | t1_orc_bucket.col2  |
++---------------------+---------------------+
+| 7902                | Frank               |
+| 7566                | JONES               |
+| 7782                | CLARK               |
+| 7839                | KING                |
+| 7876                | ADAMS               |
+| 7934                | MILLER              |
++---------------------+---------------------+
+6 rows selected (0.226 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000006_0000006_0000/
+Found 2 items
+-rw-r--r--   1 cloudera hive        523 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000006_0000006_0000/bucket_00000
+-rw-r--r--   1 cloudera hive        513 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000006_0000006_0000/bucket_00001
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket/
+Found 6 items
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:46 /user/hive/warehouse/db1.db/t1_orc_bucket/.hive-staging_hive_2020-09-18_09-45-51_019_2055987503711694941-6
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:48 /user/hive/warehouse/db1.db/t1_orc_bucket/.hive-staging_hive_2020-09-18_09-48-29_700_8913081861218681435-6
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket/.hive-staging_hive_2020-09-18_09-49-55_247_2277995321320406481-6
+drwxr-xr-x   - cloudera hive          0 2020-09-18 09:43 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000003_0000003_0000
+drwxr-xr-x   - cloudera hive          0 2020-09-18 09:46 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000004_0000004_0000
+drwxr-xr-x   - cloudera hive          0 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000006_0000006_0000
+
+--重組t1_orc_bucket,因為多次的INSERT/UPDATE/DELETE將產生許多小檔案在/user/hive/warehouse/db1.db/t1_orc_bucket/目錄下
+--這樣可能導致HDFS namenode的記憶體空間壓力,HDFS效率下降
+
+0: jdbc:hive2://cdh6:10000> CREATE TABLE t1_orc_bucket_new (
+. . . . . . . . . . . . . >   col1                int,
+. . . . . . . . . . . . . >   col2              string
+. . . . . . . . . . . . . > )
+. . . . . . . . . . . . . > CLUSTERED BY (col1) INTO 3 BUCKETS STORED AS ORC
+. . . . . . . . . . . . . > TBLPROPERTIES ("transactional"="true",
+. . . . . . . . . . . . . >   "compactor.mapreduce.map.memory.mb"="2048",
+. . . . . . . . . . . . . >   "compactorthreshold.hive.compactor.delta.num.threshold"="4",
+. . . . . . . . . . . . . >   "compactorthreshold.hive.compactor.delta.pct.threshold"="0.5"                                                      
+. . . . . . . . . . . . . > );
+No rows affected (0.097 seconds)
+0: jdbc:hive2://cdh6:10000> insert into t1_orc_bucket_new select * from t1_orc_bucket;
+WARN  :
+6 rows affected (24.335 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket_new/delta_0000007_0000007_0000
+Found 3 items
+-rw-r--r--   1 cloudera hive        706 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket_new/delta_0000007_0000007_0000/bucket_00000
+-rw-r--r--   1 cloudera hive        667 2020-09-18 09:58 /user/hive/warehouse/db1.db/t1_orc_bucket_new/delta_0000007_0000007_0000/bucket_00001
+-rw-r--r--   1 cloudera hive        669 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket_new/delta_0000007_0000007_0000/bucket_00002
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/
+Found 5 items
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:18 /user/hive/warehouse/db1.db/t1
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:26 /user/hive/warehouse/db1.db/t1_orc
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket_new
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:41 /user/hive/warehouse/db1.db/table_name
+
+0: jdbc:hive2://cdh6:10000> alter table t1_orc_bucket rename to t1_orc_bucket_old;
+No rows affected (0.223 seconds)
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/
+Found 5 items
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:18 /user/hive/warehouse/db1.db/t1
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:26 /user/hive/warehouse/db1.db/t1_orc
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket_new
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket_old
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:41 /user/hive/warehouse/db1.db/table_name
+
+0: jdbc:hive2://cdh6:10000> alter table t1_orc_bucket_new rename to t1_orc_bucket;
+No rows affected (0.077 seconds)
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/
+Found 5 items
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:18 /user/hive/warehouse/db1.db/t1
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:26 /user/hive/warehouse/db1.db/t1_orc
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:50 /user/hive/warehouse/db1.db/t1_orc_bucket_old
+drwxrwxrwt   - cloudera hive          0 2020-09-18 09:41 /user/hive/warehouse/db1.db/table_name
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/db1.db/t1_orc_bucket
+Found 1 items
+drwxr-xr-x   - cloudera hive          0 2020-09-18 09:59 /user/hive/warehouse/db1.db/t1_orc_bucket/delta_0000007_0000007_0000
+
+--CREATE INDEX從Hive 3.0不在使用
+--請建立Materialized View及使用columnar format(ORC/Parquet)
+0: jdbc:hive2://cdh6:10000> create index t1_orc_col1_idx on table t1_orc(col1) as 'compact' with deferred rebuild;
+No rows affected (0.23 seconds)
+0: jdbc:hive2://cdh6:10000> show index on t1_orc;
++-----------------------+-----------------------+-----------------------+--------------------------------+-----------------------+----------+
+|       idx_name        |       tab_name        |       col_names       |          idx_tab_name          |       idx_type        | comment  |
++-----------------------+-----------------------+-----------------------+--------------------------------+-----------------------+----------+
+| t1_orc_col1_idx       | t1_orc                | col1                  | db1__t1_orc_t1_orc_col1_idx__  | compact               |          |
++-----------------------+-----------------------+-----------------------+--------------------------------+-----------------------+----------+
+1 row selected (0.042 seconds)

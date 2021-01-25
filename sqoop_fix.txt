@@ -1,0 +1,97 @@
+﻿因為cloudera quickstart VM預設不是使用parcel方式安裝,當變更為parcel後,執行sqoop時會出現下列問題
+
+--問題1
+[cloudera@quickstart ~]$ sqoop
+ERROR: Detected incomplete Hadoop installation in /usr/lib/hadoop. This is likely because you have not removed packages in a parcel environment, or you have a leftover /usr/lib/hadoop directory. If you are using parcels, please remove the /usr/lib/hadoop directory.
+
+[cloudera@quickstart ~]$ sqoop
+WARN: Detected incomplete Hive installation in /usr/lib/hive. This is likely because you have not removed packages in a parcel environment, or you have a leftover /usr/lib/hive directory. If you are using parcels, please remove the /usr/lib/hive directory to allow Sqoop to work with Hive.
+Warning: /opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/bin/../lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+Try 'sqoop help' for usage.
+
+--解決1
+[cloudera@quickstart ~]$ sudo mv /usr/lib/hadoop /usr/lib/hadoop.bak
+[cloudera@quickstart ~]$ sudo mv /usr/lib/hive /usr/lib/hive.bak
+
+--問題2
+[cloudera@quickstart ~]$ sqoop import --table emp --connect jdbc:mysql://quickstart/scott --username root --password cloudera -m 1
+
+Exception in thread "main" java.lang.NoClassDefFoundError: org/json/JSONObject
+at org.apache.sqoop.util.SqoopJsonUtil.getJsonStringforMap(SqoopJsonUtil.java:43)
+at org.apache.sqoop.SqoopOptions.writeProperties(SqoopOptions.java:785)
+at org.apache.sqoop.metastore.hsqldb.HsqldbJobStorage.createInternal(HsqldbJobStorage.java:399)
+
+--解決2
+--下載java-json.jar,將其複製到/opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/sqoop目錄下
+[cloudera@quickstart ~]$ curl -O http://10.0.1.100:5050/Class_log/java-json.jar
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 84697  100 84697    0     0  2758k      0 --:--:-- --:--:-- --:--:-- 3308k
+
+[cloudera@quickstart ~]$ ls -l java-json.jar
+-rw-rw-r-- 1 cloudera cloudera 84697 Sep 23 18:30 java-json.jar
+[cloudera@quickstart ~]$ sudo cp java-json.jar /opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/sqoop
+
+--問題3
+[cloudera@quickstart ~]$ sqoop import --connect jdbc:mysql://quickstart/retail_db --username root --password cloudera --table customers \
+                                      --hive-import --create-hive-table --hive-database default --warehouse-dir /user/hive/warehouse
+
+19/08/12 17:47:04 ERROR hive.HiveConfig: Could not load org.apache.hadoop.hive.conf.HiveConf. Make sure HIVE_CONF_DIR is set correctly.
+19/08/12 17:47:04 ERROR tool.ImportTool: Import failed: java.io.IOException: java.lang.ClassNotFoundException: org.apache.hadoop.hive.conf.HiveConf
+        at org.apache.sqoop.hive.HiveConfig.getHiveConf(HiveConfig.java:50)
+        at org.apache.sqoop.hive.HiveImport.getHiveArgs(HiveImport.java:392)
+        at org.apache.sqoop.hive.HiveImport.executeExternalHiveScript(HiveImport.java:379)
+        at org.apache.sqoop.hive.HiveImport.executeScript(HiveImport.java:337)
+        at org.apache.sqoop.hive.HiveImport.importTable(HiveImport.java:241)
+        at org.apache.sqoop.tool.ImportTool.importTable(ImportTool.java:530)
+        at org.apache.sqoop.tool.ImportTool.run(ImportTool.java:621)
+        at org.apache.sqoop.Sqoop.run(Sqoop.java:147)
+        at org.apache.hadoop.util.ToolRunner.run(ToolRunner.java:70)
+        at org.apache.sqoop.Sqoop.runSqoop(Sqoop.java:183)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:234)
+        at org.apache.sqoop.Sqoop.runTool(Sqoop.java:243)
+        at org.apache.sqoop.Sqoop.main(Sqoop.java:252)
+Caused by: java.lang.ClassNotFoundException: org.apache.hadoop.hive.conf.HiveConf
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:382)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:349)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+        at java.lang.Class.forName0(Native Method)
+        at java.lang.Class.forName(Class.java:264)
+        at org.apache.sqoop.hive.HiveConfig.getHiveConf(HiveConfig.java:44)
+        ... 12 more
+
+--解決3
+修改$gedit /home/cloudera/.bash_profile加入下列設定
+export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/opt/cloudera/parcels/CDH-5.13.0-1.cdh5.13.0.p0.29/lib/hive/lib/*
+                                          ----------------------------------------------------------------
+
+--問題4
+sqoop使用--create-hive-table選項載入資料,但使用hive卻看不到該表格
+hive> show tables;
+OK
+Time taken: 1.798 seconds, Fetched: 0 row(s)
+
+
+--解決4
+[cloudera@quickstart ~]$ sudo cp /etc/hive/conf/hive-site.xml /etc/sqoop/conf/
+[cloudera@quickstart ~]$ sudo cp /etc/hive/conf/hive-env.sh /etc/sqoop/conf/hive-env.sh
+重新使用sqoop載入即可在hive介面看到相關表格									  
+
+hive> show tables;
+OK
+customers
+Time taken: 1.798 seconds, Fetched: 1 row(s)
+hive> desc customers;
+OK
+customer_id             int
+customer_fname          string
+customer_lname          string
+customer_email          string
+customer_password       string
+customer_street         string
+customer_city           string
+customer_state          string
+customer_zipcode        string
+Time taken: 0.069 seconds, Fetched: 9 row(s)

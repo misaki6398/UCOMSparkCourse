@@ -1,0 +1,82 @@
+[cloudera@quickstart ~]$ pyspark
+Python 2.6.6 (r266:84292, Jul 23 2015, 15:22:56)
+[GCC 4.4.7 20120313 (Red Hat 4.4.7-11)] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+Setting default log level to "WARN".
+To adjust logging level use sc.setLogLevel(newLevel).
+19/06/24 23:13:54 WARN util.Utils: Your hostname, quickstart.cloudera resolves to a loopback address: 127.0.0.1; using 10.0.2.15 instead (on interface eth0)
+19/06/24 23:13:54 WARN util.Utils: Set SPARK_LOCAL_IP if you need to bind to another address
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 1.6.0
+      /_/
+
+Using Python version 2.6.6 (r266:84292, Jul 23 2015 15:22:56)
+SparkContext available as sc, HiveContext available as sqlContext.
+>>> exit()
+[cloudera@quickstart ~]$ java -version
+java version "1.7.0_67"
+Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
+Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
+
+--安裝Java 8
+1.停止所有的Hadoop Services
+2.停止clouera Manager服務
+$ su - root 
+password: cloudera
+[root@quickstart ~]# service cloudera-scm-server stop
+[root@quickstart ~]# service cloudera-scm-agent stop
+3.安裝JDK 8
+[root@quickstart ~]# cd /usr/java
+[root@quickstart java]# cp /root/jdk-8u211-linux-x64.tar.gz .
+[root@quickstart java]# gunzip jdk-8u211-linux-x64.tar.gz
+[root@quickstart java]# tar -xvf jdk-8u211-linux-x64.tar jdk1.8.0_211
+[root@quickstart java]# ls -l
+total 398508
+drwxr-xr-x 8 root root      4096 Oct 23  2017 jdk1.7.0_67-cloudera
+drwxr-xr-x 7 uucp  143      4096 Apr  1 20:51 jdk1.8.0_211
+-rw-r--r-- 1 root root 408064000 Jun 25 02:06 jdk-8u211-linux-x64.tar
+
+[root@quickstart ~]# tail /etc/profile
+        fi
+    fi
+done
+
+unset i
+unset -f pathmunge
+export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
+export ANT_HOME=/usr/local/apache-ant/apache-ant-1.9.2
+export M2_HOME=/usr/local/apache-maven/apache-maven-3.0.4
+export PATH=/usr/local/firefox:/sbin:$JAVA_HOME/bin:$ANT_HOME/bin:$M2_HOME/bin:$PATH
+
+--將JAVA_HOME變更為JAVA_HOME=/usr/java/jdk1.8.0_211
+
+
+--安裝Spark 2在Cloudera QuickStart VM
+1.點擊桌面"Migrate to Parcels",需要下載Parcel,所以需要一些時間
+2.http://www.cloudera.com/documentation/spark2/latest/topics/spark2_packaging.html
+紀錄連結:http://archive.cloudera.com/spark2/csd/SPARK2_ON_YARN-2.4.0.cloudera2.jar
+3.[cloudera@quickstart ~]$ su - root
+Password: cloudera
+[root@quickstart ~]# cd /opt/cloudera/csd
+[root@quickstart csd]# wget http://archive.cloudera.com/spark2/csd/SPARK2_ON_YARN-2.4.0.cloudera2.jar
+--2019-06-24 23:49:37--  http://archive.cloudera.com/spark2/csd/SPARK2_ON_YARN-2.4.0.cloudera2.jar
+Resolving archive.cloudera.com... 151.101.0.167, 151.101.64.167, 151.101.128.167, ...
+Connecting to archive.cloudera.com|151.101.0.167|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 19066 (19K) [application/java-archive]
+Saving to: SPARK2_ON_YARN-2.4.0.cloudera2.jar??
+
+100%[================================================================>] 19,066      --.-K/s   in 0.003s
+
+2019-06-24 23:49:37 (5.59 MB/s) - SPARK2_ON_YARN-2.4.0.cloudera2.jar??saved [19066/19066]
+[root@quickstart csd]# ls -l
+total 20
+-rw-r--r-- 1 root root 19066 Apr 29 07:27 SPARK2_ON_YARN-2.4.0.cloudera2.jar
+[root@quickstart csd]# chown cloudera-scm:cloudera-scm SPARK2_ON_YARN-2.4.0.cloudera2.jar
+[root@quickstart csd]# chmod 644 SPARK2_ON_YARN-2.4.0.cloudera2.jar
+
+
+
