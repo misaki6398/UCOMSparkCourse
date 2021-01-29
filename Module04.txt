@@ -297,7 +297,7 @@ hive> create external table t2
     > (col1 int,col2 varchar(10))
     > row format delimited
     > fields terminated by ','
-    > stored as textfile;
+    > stored as textfile;             --沒有明確使用LOCATION指定表格目錄所在位置,則預設放在目前所在資料庫的目錄之下
 OK
 Time taken: 0.055 seconds
 
@@ -498,6 +498,12 @@ NULL    1000    --Hive資料超過欄位定義長度時,將以NULL呈現
 NULL    10000
 Time taken: 0.068 seconds, Fetched: 3 row(s)
 
+hive> select col1-100,col2 from t3;
+OK
+100     100
+NULL    1000    --先以NULL出現,然後執行運算(NULL-100)=> NULL 
+NULL    10000
+Time taken: 0.068 seconds, Fetched: 3 row(s)
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 [cdh6:21000] > describe t3;
 Query: describe t3
@@ -521,7 +527,88 @@ Query progress can be monitored at: http://cdh6:25000/query_plan?query_id=8342e5
 +------+-------+
 Fetched 3 row(s) in 1.15s
 
+[cdh6:21000] > select * from t3;
+Query: select col1-100,col2 from t3
+Query submitted at: 2020-04-10 20:58:10 (Coordinator: http://cdh6:25000)
+Query progress can be monitored at: http://cdh6:25000/query_plan?query_id=8342e5c825a2ac0c:3a002ea500000000
++----------+-------+
+| col1-100 | col2  |
++----------+-------+
+| 100      | 100   |
+|  27      | 1000  |   --先以最大值呈現,在進行運算(127-100)=27
+|  27      | 10000 |
++----------+-------+
+Fetched 3 row(s) in 1.15s
+
 ================================================================================================
+[cloudera@cdh6 ~]$ head apache_logs.txt
+83.149.9.216 - - [17/May/2015:10:05:03 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1" 200 203023 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:43 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-dashboard3.png HTTP/1.1" 200 171717 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:47 +0000] "GET /presentations/logstash-monitorama-2013/plugin/highlight/highlight.js HTTP/1.1" 200 26185 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:12 +0000] "GET /presentations/logstash-monitorama-2013/plugin/zoom-js/zoom.js HTTP/1.1" 200 7697 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:07 +0000] "GET /presentations/logstash-monitorama-2013/plugin/notes/notes.js HTTP/1.1" 200 2892 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:34 +0000] "GET /presentations/logstash-monitorama-2013/images/sad-medic.png HTTP/1.1" 200 430406 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:57 +0000] "GET /presentations/logstash-monitorama-2013/css/fonts/Roboto-Bold.ttf HTTP/1.1" 200 38720 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:50 +0000] "GET /presentations/logstash-monitorama-2013/css/fonts/Roboto-Regular.ttf HTTP/1.1" 200 41820 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:24 +0000] "GET /presentations/logstash-monitorama-2013/images/frontend-response-codes.png HTTP/1.1" 200 52878 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+83.149.9.216 - - [17/May/2015:10:05:50 +0000] "GET /presentations/logstash-monitorama-2013/images/kibana-dashboard.png HTTP/1.1" 200 321631 "http://semicomplete.com/presentations/logstash-monitorama-2013/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36"
+
+[cloudera@cdh6 ~]$ hdfs dfs -mkdir access_logs
+
+[cloudera@cdh6 ~]$ hdfs dfs -put apache_logs.txt access_logs
+================================================================================================
+--建立外部表格對應/user/cloudera/access_logs目錄,其中資料格式為apache http server的日誌格式
+CREATE TABLE apachelog (
+  host STRING,
+  identity STRING,
+  username STRING,
+  time STRING,
+  request STRING,
+  status STRING,
+  size STRING,
+  referer STRING,
+  agent STRING)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+WITH SERDEPROPERTIES (
+  "input.regex" = "([^ ]*) ([^ ]*) ([^ ]*) (-|\\[[^\\]]*\\]) ([^ \"]*|\"[^\"]*\") (-|[0-9]*) (-|[0-9]*)(?: ([^ \"]*|\"[^\"]*\") ([^ \"]*|\"[^\"]*\"))?",
+  "output.format.string" = "%1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s %9$s")
+STORED AS TEXTFILE
+LOCATION '/user/cloudera/access_logs';
+
+hive> desc apachelog;
+OK
+host                    string
+identity                string
+username                string
+time                    string
+request                 string
+status                  string
+size                    string
+referer                 string
+agent                   string
+Time taken: 0.254 seconds, Fetched: 9 row(s)
+hive> select host,username,time from apachelog limit 5;
+OK
+83.149.9.216    -       [17/May/2015:10:05:03 +0000]
+83.149.9.216    -       [17/May/2015:10:05:43 +0000]
+83.149.9.216    -       [17/May/2015:10:05:47 +0000]
+83.149.9.216    -       [17/May/2015:10:05:12 +0000]
+83.149.9.216    -       [17/May/2015:10:05:07 +0000]
+Time taken: 0.267 seconds, Fetched: 5 row(s)
+
+hive> select host,count(*) hostcnt from apachelog group by host order by hostcnt desc limit 10;
+66.249.73.135   482
+46.105.14.53    364
+130.237.218.86  357
+75.97.9.59      273
+50.16.19.13     113
+209.85.238.199  102
+68.180.224.225  99
+100.43.83.137   84
+208.115.111.72  83
+198.46.149.143  82
+Time taken: 96.144 seconds, Fetched: 10 row(s)
+
 hive> desc customers;
 OK
 customer_id             int
@@ -663,6 +750,10 @@ Time taken: 2.126 seconds, Fetched: 8 row(s)  --執行時間明顯短許多,因�
 
 
 [cloudera@cdh6 ~]$ hdfs dfs -put emp1.csv /user/hive/warehouse/emp
+
+--顯示hive所支援的函數
+0: jdbc:hive2://cdh6:10000> show functions;
+
 
 0: jdbc:hive2://localhost:10000> select empno,mgr from emp;
 INFO  : Compiling command(queryId=hive_20190627204646_fa8a364f-ed57-40c4-993d-66b23ad06feb): select empno,mgr from emp
@@ -941,6 +1032,26 @@ avg(comm) = 2200/4 = sum(comm)/count(comm)
 | 2200  | 157.142857  | 14   | 14   |
 +-------+-------------+------+------+--+
 
+--找出員工薪資大於所在部門平均薪資的人
+---使用ANSI 99的join syntax
+0: jdbc:hive2://cdh6:10000> select e1.name,e1.deptno,e1.sal,e2.avgsal
+. . . . . . . . . . . . . > from emp e1 join (select deptno,avg(sal) avgsal from emp group by deptno) e2 on (e1.deptno=e2.deptno and e1.sal>e2.avgsal);
+Error: Error while compiling statement: FAILED: SemanticException [Error 10017]: Line 2:105 Both left and right aliases encountered in JOIN 'avgsal' (state=42000,code=10017)
+
+---使用ANSI 92的join syntax
+0: jdbc:hive2://cdh6:10000> select e1.name,e1.deptno,e1.sal,e2.avgsal
+. . . . . . . . . . . . . > from emp e1 ,(select deptno,avg(sal) avgsal from emp group by deptno) e2 where (e1.deptno=e2.deptno and e1.sal>e2.avgsal);
++----------+------------+---------+---------------------+
+| e1.name  | e1.deptno  | e1.sal  |      e2.avgsal      |
++----------+------------+---------+---------------------+
+| KING     | 10         | 5000    | 2916.6666666666665  |
+| BLAKE    | 30         | 2850    | 1566.6666666666667  |
+| JONES    | 20         | 2975    | 2175.0              |
+| SCOTT    | 20         | 3000    | 2175.0              |
+| FORD     | 20         | 3000    | 2175.0              |
+| ALLEN    | 30         | 1600    | 1566.6666666666667  |
++----------+------------+---------+---------------------+
+
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 --使用sqoop匯入scott.dept到hive default資料庫
 sqoop import --connect jdbc:mysql://quickstart/scott --username root --password cloudera --table dept --split-by deptno \
@@ -977,6 +1088,34 @@ sqoop import --connect jdbc:mysql://quickstart/scott --username root --password 
 | MILLER  | ACCOUNTING  |
 +---------+-------------+--+
 14 rows selected (21.144 seconds)
+
+--JOIN
+--INNER JOIN 
+--ANSI 99
+0: jdbc:hive2://cdh6:10000> select emp.name,dept.dname
+. . . . . . . . . . . . . > from emp join dept on (emp.deptno=dept.deptno);
+
+--ANSI 92
+0: jdbc:hive2://cdh6:10000> select emp.name,dept.dname
+. . . . . . . . . . . . . > from emp, dept 
+. . . . . . . . . . . . . > where (emp.deptno=dept.deptno);
+
+--OUTER JOIN
+--ANSI 99
+0: jdbc:hive2://cdh6:10000> select emp.name,dept.dname
+. . . . . . . . . . . . . > from emp left join dept on (emp.deptno=dept.deptno);
+                                     right
+									 full
+--ANSI 92
+0: jdbc:hive2://cdh6:10000> select emp.name,dept.dname
+. . . . . . . . . . . . . > from emp ,dept where (emp.deptno=dept.deptno(+));
+Error: Error while compiling statement: FAILED: ParseException line 2:46 cannot recognize input near ')' ')' '<EOF>' in expression specification (state=42000,code=40000)
+
+
+--將dept當作變數,傳遞到所有worker node
+0: jdbc:hive2://cdh6:10000> select /*+ MAPJOIN(dept) */ emp.name,dept.dname
+. . . . . . . . . . . . . > from emp join dept on (emp.deptno=dept.deptno);
+
 
 
 0: jdbc:hive2://localhost:10000> create table wordcount
@@ -1055,6 +1194,18 @@ Good Afternoon Everyone.
 | [["Good","Afternoon","Everyone"]]  |
 +------------------------------------+--+
 5 rows selected (2.215 seconds)
+
+0: jdbc:hive2://cdh6:10000> select explode(sentences(line)) from wordcount;
++----------------------------------+
+|               col                |
++----------------------------------+
+| ["Hello","Frank"]                |
+| ["Hello","Hadoop"]               |
+| ["Hello","Spark"]                |
+| ["Hi","Frank"]                   |
+| ["Good","Afternoon","Everyone"]  |
++----------------------------------+
+5 rows selected (1.117 seconds)
 
 0: jdbc:hive2://cdh6:10000> select explode(explode(sentences(line))) word from wordcount;
 Error: Error while compiling statement: FAILED: SemanticException [Error 10081]: UDTF's are not supported outside the SELECT clause, nor nested in expressions (state=42000,code=10081)
@@ -1248,7 +1399,7 @@ No rows affected (0.068 seconds)
 . . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
 . . . . . . . . . . . . . > group by word
 . . . . . . . . . . . . . > order by word_count desc
-. . . . . . . . . . . . . > limit 20,20;                      --跳過前20筆,讀取下面20筆
+. . . . . . . . . . . . . > limit 20,20;                      --分頁技巧,跳過前20筆,讀取下面20筆
 +--------+-------------+
 |  word  | word_count  |
 +--------+-------------+
@@ -1307,38 +1458,242 @@ No rows affected (0.068 seconds)
 +---------+-------------+
 20 rows selected (4.214 seconds)
 
-0: jdbc:hive2://cdh6:10000> select word,count(*) word_count
+--建議將wordcount結果建立為一個新表
+0: jdbc:hive2://cdh6:10000> create table shakespeare_wordcount stored as orc
+. . . . . . . . . . . . . > as
+. . . . . . . . . . . . . > select word,count(*) word_count
 . . . . . . . . . . . . . > from (select explode(word) word from (select explode(sentences(upper(line),' ')) word from docs) wordtmp1) wordtmp2
 . . . . . . . . . . . . . > where wordtmp2.word not in (select upper(word) from stopwords)
 . . . . . . . . . . . . . > group by word
 . . . . . . . . . . . . . > having count(*)>500
 . . . . . . . . . . . . . > order by word_count desc
-. . . . . . . . . . . . . > limit 20;
-+--------+-------------+
-|  word  | word_count  |
-+--------+-------------+
-| THOU   | 5487        |
-| THY    | 4032        |
-| SHALL  | 3591        |
-| THEE   | 3178        |
-| LORD   | 3060        |
-| KING   | 2862        |
-| GOOD   | 2814        |
-| SIR    | 2759        |
-| O      | 2609        |
-| COME   | 2512        |
-| WOULD  | 2293        |
-| WELL   | 2154        |
-| LET    | 2101        |
-| ENTER  | 2099        |
-| LOVE   | 2054        |
-| HATH   | 1941        |
-| MAY    | 1850        |
-| MAN    | 1835        |
-| ONE    | 1780        |
-| I'LL   | 1743        |
-+--------+-------------+
-20 rows selected (6.051 seconds)
+. . . . . . . . . . . . . > ;
+
+0: jdbc:hive2://cdh6:10000> desc formatted shakespeare_wordcount;
++-------------------------------+----------------------------------------------------+-----------------------------+
+|           col_name            |                     data_type                      |           comment           |
++-------------------------------+----------------------------------------------------+-----------------------------+
+| # col_name                    | data_type                                          | comment                     |
+|                               | NULL                                               | NULL                        |
+| word                          | string                                             |                             |
+| word_count                    | bigint                                             |                             |
+|                               | NULL                                               | NULL                        |
+| # Detailed Table Information  | NULL                                               | NULL                        |
+| Database:                     | default                                            | NULL                        |
+| OwnerType:                    | USER                                               | NULL                        |
+| Owner:                        | cloudera                                           | NULL                        |
+| CreateTime:                   | Fri Jan 29 11:46:34 CST 2021                       | NULL                        |
+| LastAccessTime:               | UNKNOWN                                            | NULL                        |
+| Retention:                    | 0                                                  | NULL                        |
+| Location:                     | hdfs://cdh6:8020/user/hive/warehouse/shakespeare_wordcount | NULL                        |
+| Table Type:                   | MANAGED_TABLE                                      | NULL                        |
+| Table Parameters:             | NULL                                               | NULL                        |
+|                               | COLUMN_STATS_ACCURATE                              | {\"BASIC_STATS\":\"true\"}  |
+|                               | numFiles                                           | 1                           |
+|                               | numRows                                            | 127                         |
+|                               | rawDataSize                                        | 12192                       |
+|                               | totalSize                                          | 902                         |
+|                               | transient_lastDdlTime                              | 1611891994                  |
+|                               | NULL                                               | NULL                        |
+| # Storage Information         | NULL                                               | NULL                        |
+| SerDe Library:                | org.apache.hadoop.hive.ql.io.orc.OrcSerde          | NULL                        |
+| InputFormat:                  | org.apache.hadoop.hive.ql.io.orc.OrcInputFormat    | NULL                        |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat   | NULL                        |
+| Compressed:                   | No                                                 | NULL                        |
+| Num Buckets:                  | -1                                                 | NULL                        |
+| Bucket Columns:               | []                                                 | NULL                        |
+| Sort Columns:                 | []                                                 | NULL                        |
+| Storage Desc Params:          | NULL                                               | NULL                        |
+|                               | serialization.format                               | 1                           |
++-------------------------------+----------------------------------------------------+-----------------------------+
+32 rows selected (0.2 seconds)
+
+0: jdbc:hive2://cdh6:10000> select * from  shakespeare_wordcount limit 20,20;
++-----------------------------+-----------------------------------+
+| shakespeare_wordcount.word  | shakespeare_wordcount.word_count  |
++-----------------------------+-----------------------------------+
+| THOU                        | 5487                              |
+| THY                         | 4032                              |
+| SHALL                       | 3591                              |
+| THEE                        | 3178                              |
+| LORD                        | 3060                              |
+| KING                        | 2862                              |
+| GOOD                        | 2814                              |
+| SIR                         | 2759                              |
+| O                           | 2609                              |
+| COME                        | 2512                              |
+| WOULD                       | 2293                              |
+| WELL                        | 2154                              |
+| LET                         | 2101                              |
+| ENTER                       | 2099                              |
+| LOVE                        | 2054                              |
+| HATH                        | 1941                              |
+| MAY                         | 1850                              |
+| MAN                         | 1835                              |
+| ONE                         | 1780                              |
+| I'LL                        | 1743                              |
++-----------------------------+-----------------------------------+
+20 rows selected (0.125 seconds)
+
+[cloudera@cdh6 ~]$ hdfs dfs -ls /user/hive/warehouse/shakespeare_wordcount/
+Found 1 items
+-rwxrwxrwt   1 cloudera hive        902 2021-01-29 11:46 /user/hive/warehouse/shakespeare_wordcount/000000_0
+
+0: jdbc:hive2://cdh6:10000> select sentences(upper(line),' ') word from docs;
++----------------------------------------------------+
+|                        word                        |
++----------------------------------------------------+
+| [["THE","SONNETS"]]                                |
+| []                                                 |
+| [["BY","WILLIAM","SHAKESPEARE"]]                   |
+| []                                                 |
+| []                                                 |
+| []                                                 |
+| [["1"]]                                            |
+| [["FROM","FAIREST","CREATURES","WE","DESIRE","INCREASE"]] |
+| [["THAT","THEREBY","BEAUTY'S","ROSE","MIGHT","NEVER","DIE"]] |
+| [["BUT","AS","THE","RIPER","SHOULD","BY","TIME","DECEASE"]] |
++----------------------------------------------------+
+10 rows selected (1.139 seconds)
+
+--N-Grams                  
+                                                                                10表示顯示前10名
+0: jdbc:hive2://cdh6:10000> select explode(ngrams(sentences(upper(line),' ')),2,10) word from docs;
+                                                                              2表示在同一行裡,2個字一同出現
++------------------------------------------------+
+|                      word                      |
++------------------------------------------------+
+| {"ngram":["I","AM"],"estfrequency":1829.0}     |
+| {"ngram":["OF","THE"],"estfrequency":1680.0}   |
+| {"ngram":["MY","LORD"],"estfrequency":1645.0}  |
+| {"ngram":["IN","THE"],"estfrequency":1603.0}   |
+| {"ngram":["I","HAVE"],"estfrequency":1577.0}   |
+| {"ngram":["I","WILL"],"estfrequency":1526.0}   |
+| {"ngram":["TO","THE"],"estfrequency":1408.0}   |
+| {"ngram":["IT","IS"],"estfrequency":1057.0}    |
+| {"ngram":["TO","BE"],"estfrequency":957.0}     |
+| {"ngram":["THAT","I"],"estfrequency":899.0}    |
++------------------------------------------------+
+10 rows selected (3.661 seconds)
+
+0: jdbc:hive2://cdh6:10000> select explode(ngrams(sentences(upper(line),' ')),3,10) word from docs;
++----------------------------------------------------+
+|                        word                        |
++----------------------------------------------------+
+| {"ngram":["I","PRAY","YOU"],"estfrequency":231.0}  |
+| {"ngram":["SO","LONG","AS"],"estfrequency":231.0}  |
+| {"ngram":["1993","BY","WORLD"],"estfrequency":217.0} |
+| {"ngram":["2","ARE","NOT"],"estfrequency":217.0}   |
+| {"ngram":["AND","2","ARE"],"estfrequency":217.0}   |
+| {"ngram":["FOR","YOUR","OR"],"estfrequency":217.0} |
+| {"ngram":["INC","AND","IS"],"estfrequency":217.0}  |
+| {"ngram":["SUCH","COPIES","1"],"estfrequency":217.0} |
+| {"ngram":["THAT","CHARGES","FOR"],"estfrequency":217.0} |
+| {"ngram":["WORLD","LIBRARY","INC"],"estfrequency":217.0} |
++----------------------------------------------------+
+10 rows selected (3.13 seconds)
+
+
+--Window Function
+---RANK()
+0: jdbc:hive2://cdh6:10000> select rank() over (order by sal desc) salrank,name,sal from emp;
++----------+---------+-------+
+| salrank  |  name   |  sal  |
++----------+---------+-------+
+| 1        | KING    | 5000  |
+| 2        | FRANK   | 3300  |
+| 3        | SCOTT   | 3000  |
+| 3        | FORD    | 3000  |
+| 5        | JONES   | 2975  |
+| 6        | BLAKE   | 2850  |
+| 7        | CLARK   | 2450  |
+| 8        | ALLEN   | 1600  |
+| 9        | TURNER  | 1500  |
+| 10       | MILLER  | 1300  |
+| 11       | WARD    | 1250  |
+| 11       | MARTIN  | 1250  |
+| 13       | ADAMS   | 1100  |
+| 14       | JAMES   | 950   |
+| 15       | SMITH   | 800   |
++----------+---------+-------+
+15 rows selected (1.169 seconds)
+
+--10st
+0: jdbc:hive2://cdh6:10000> select * from (select rank() over (order by sal desc) salrank,name,sal from emp) empsalrank where salrank=10;
++---------------------+------------------+-----------------+
+| empsalrank.salrank  | empsalrank.name  | empsalrank.sal  |
++---------------------+------------------+-----------------+
+| 10                  | MILLER           | 1300            |
++---------------------+------------------+-----------------+
+1 row selected (1.15 seconds)
+
+--依照deptno分群,然後依sal排序
+0: jdbc:hive2://cdh6:10000> select rank() over (partition by deptno order by sal desc) salrank,name,sal,deptno from emp;
++----------+---------+-------+---------+
+| salrank  |  name   |  sal  | deptno  |
++----------+---------+-------+---------+
+| 1        | KING    | 5000  | 10      |
+| 2        | CLARK   | 2450  | 10      |
+| 3        | MILLER  | 1300  | 10      |
+| 1        | SCOTT   | 3000  | 20      | --避免兩個1,請在order by部份加上其他欄位,用來區分順序
+| 1        | FORD    | 3000  | 20      | --
+| 3        | JONES   | 2975  | 20      | --2不見,因為有兩個1
+| 4        | ADAMS   | 1100  | 20      |
+| 5        | SMITH   | 800   | 20      |
+| 1        | BLAKE   | 2850  | 30      |
+| 2        | ALLEN   | 1600  | 30      |
+| 3        | TURNER  | 1500  | 30      |
+| 4        | WARD    | 1250  | 30      |
+| 4        | MARTIN  | 1250  | 30      |
+| 6        | JAMES   | 950   | 30      |
+| 1        | FRANK   | 3300  | 50      |
++----------+---------+-------+---------+
+15 rows selected (1.148 seconds)
+
+--DENSE_RANK
+0: jdbc:hive2://cdh6:10000> select dense_rank() over (partition by deptno order by sal desc) salrank,name,sal,deptno from emp;
++----------+---------+-------+---------+
+| salrank  |  name   |  sal  | deptno  |
++----------+---------+-------+---------+
+| 1        | KING    | 5000  | 10      |
+| 2        | CLARK   | 2450  | 10      |
+| 3        | MILLER  | 1300  | 10      |
+| 1        | SCOTT   | 3000  | 20      |
+| 1        | FORD    | 3000  | 20      |
+| 2        | JONES   | 2975  | 20      | --即便有兩個1,但還是維持遞增規律
+| 3        | ADAMS   | 1100  | 20      |
+| 4        | SMITH   | 800   | 20      |
+| 1        | BLAKE   | 2850  | 30      |
+| 2        | ALLEN   | 1600  | 30      |
+| 3        | TURNER  | 1500  | 30      |
+| 4        | WARD    | 1250  | 30      |
+| 4        | MARTIN  | 1250  | 30      |
+| 5        | JAMES   | 950   | 30      |
+| 1        | FRANK   | 3300  | 50      |
++----------+---------+-------+---------+
+15 rows selected (1.177 seconds)
+
+0: jdbc:hive2://cdh6:10000> select rank() over (partition by deptno order by sal desc,empno asc) salrank,name,sal,deptno from emp;
++----------+---------+-------+---------+
+| salrank  |  name   |  sal  | deptno  |
++----------+---------+-------+---------+
+| 1        | KING    | 5000  | 10      |
+| 2        | CLARK   | 2450  | 10      |
+| 3        | MILLER  | 1300  | 10      |
+| 1        | SCOTT   | 3000  | 20      |
+| 2        | FORD    | 3000  | 20      |
+| 3        | JONES   | 2975  | 20      |
+| 4        | ADAMS   | 1100  | 20      |
+| 5        | SMITH   | 800   | 20      |
+| 1        | BLAKE   | 2850  | 30      |
+| 2        | ALLEN   | 1600  | 30      |
+| 3        | TURNER  | 1500  | 30      |
+| 4        | WARD    | 1250  | 30      |
+| 5        | MARTIN  | 1250  | 30      |
+| 6        | JAMES   | 950   | 30      |
+| 1        | FRANK   | 3300  | 50      |
++----------+---------+-------+---------+
+15 rows selected (1.138 seconds)
 
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 --Hive Table Update(orc format+buckets+table properties+hive transaction configurations)
@@ -1546,3 +1901,309 @@ No rows affected (0.23 seconds)
 | t1_orc_col1_idx       | t1_orc                | col1                  | db1__t1_orc_t1_orc_col1_idx__  | compact               |          |
 +-----------------------+-----------------------+-----------------------+--------------------------------+-----------------------+----------+
 1 row selected (0.042 seconds)
+
+===================================================================================================================================================
+--排序操作
+ORDER By
+SORT BY
+DISTRIBUTED BY SORT BY
+CLUSTERED BY
+
+--設定Reducer數量,hive on spark也通用
+0: jdbc:hive2://cdh6:10000> set mapreduce.job.reduces=3;  --控制reducer數量
+
+0: jdbc:hive2://cdh6:10000> select * from emp;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (0.105 seconds)
+
+--ORDER By(全域排序),預設為asc
+0: jdbc:hive2://cdh6:10000> select * from emp order by sal desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (1.181 seconds)
+
+--SORT By,依照每個reducer所得到的資料,自己排序.不與其他reducer合併後才排序
+0: jdbc:hive2://cdh6:10000> select * from emp sort by sal desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |------------------
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |-------------------
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (4.095 seconds)
+0: jdbc:hive2://cdh6:10000> set mapreduce.job.reduces;
++--------------------------+
+|           set            |
++--------------------------+
+| mapreduce.job.reduces=3  |
++--------------------------+
+1 row selected (0.006 seconds)
+
+0: jdbc:hive2://cdh6:10000> set mapreduce.job.reduces=2;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://cdh6:10000> select * from emp sort by sal desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |------------------------
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (2.159 seconds)
+
+--DISTRIBUTE By,重新依照所指定欄位分成n個partition(n=mapreduce.job.reduces)
+--必須搭配SORT BY,且出現在SORT By之前
+0: jdbc:hive2://cdh6:10000> set mapreduce.job.reduces=3;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://cdh6:10000> select * from emp distribute by deptno sort by sal desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |-------------------------
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |-------------------------
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (2.169 seconds)
+
+0: jdbc:hive2://cdh6:10000> set mapreduce.job.reduces=2;
+No rows affected (0.003 seconds)
+0: jdbc:hive2://cdh6:10000> select * from emp distribute by deptno sort by sal desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |----------------------------
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (1.282 seconds)
+
+--CLUSTER BY,如果DISTRIBUTE BY與SORT BY皆使用同一個欄位時,可以直接使用CLUSTER BY代替
+--但CLUSTER BY固定為ASC
+0: jdbc:hive2://cdh6:10000> select * from emp distribute by deptno sort by deptno;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          | -------
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (2.577 seconds)
+
+0: jdbc:hive2://cdh6:10000> select * from emp distribute by deptno sort by deptno desc;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |-------
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (2.151 seconds)
+
+0: jdbc:hive2://cdh6:10000> select * from emp cluster by deptno;
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| emp.empno  | emp.name  |  emp.job   | emp.mgr  | emp.hiredate  | emp.sal  | emp.comm  | emp.deptno  |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+| 7566       | JONES     | MANAGER    | 7839     | 02-APR-81     | 2975     | NULL      | 20          |
+| 7788       | SCOTT     | ANALYST    | 7566     | 19-APR-87     | 3000     | NULL      | 20          |
+| 7902       | FORD      | ANALYST    | 7566     | 03-DEC-81     | 3000     | NULL      | 20          |
+| 7369       | SMITH     | CLERK      | 7902     | 17-DEC-80     | 800      | NULL      | 20          |
+| 7876       | ADAMS     | CLERK      | 7788     | 23-MAY-87     | 1100     | NULL      | 20          |-------
+| 7839       | KING      | PRESIDENT  | NULL     | 17-NOV-81     | 5000     | NULL      | 10          |
+| 7782       | CLARK     | MANAGER    | 7839     | 09-JUN-81     | 2450     | NULL      | 10          |
+| 7934       | MILLER    | CLERK      | 7782     | 23-JAN-82     | 1300     | NULL      | 10          |
+| 7698       | BLAKE     | MANAGER    | 7839     | 01-MAY-81     | 2850     | NULL      | 30          |
+| 7499       | ALLEN     | SALESMAN   | 7698     | 20-FEB-81     | 1600     | 300       | 30          |
+| 7521       | WARD      | SALESMAN   | 7698     | 22-FEB-81     | 1250     | 500       | 30          |
+| 7654       | MARTIN    | SALESMAN   | 7698     | 28-SEP-81     | 1250     | 1400      | 30          |
+| 7844       | TURNER    | SALESMAN   | 7698     | 08-SEP-81     | 1500     | 0         | 30          |
+| 7900       | JAMES     | CLERK      | 7698     | 03-DEC-81     | 950      | NULL      | 30          |
+| 7901       | FRANK     | TRAINER    | 7839     | 23-JAN-85     | 3300     | NULL      | 50          |
++------------+-----------+------------+----------+---------------+----------+-----------+-------------+
+15 rows selected (1.133 seconds)
+
+--顯示執行計畫
+0: jdbc:hive2://cdh6:10000> explain
+. . . . . . . . . . . . . > select emp.name,dept.dname
+. . . . . . . . . . . . . > from emp join dept on (emp.deptno=dept.deptno);  --理論上應該由小表join大表
++----------------------------------------------------+
+|                      Explain                       |
++----------------------------------------------------+
+| STAGE DEPENDENCIES:                                |
+|   Stage-2 is a root stage                          |
+|   Stage-1 depends on stages: Stage-2               |
+|   Stage-0 depends on stages: Stage-1               |   --先執行stage-2,然後stage-1,最後stage-0
+|                                                    |
+| STAGE PLANS:                                       |
+|   Stage: Stage-2                                   |
+|     Spark                                          |
+|       DagName: hive_20210129112315_b48e30db-d209-422e-a371-f05afe64a6f7:57 |
+|       Vertices:                                    |
+|         Map 2                                      |
+|             Map Operator Tree:                     |
+|                 TableScan                          |
+|                   alias: dept                      |
+|                   filterExpr: deptno is not null (type: boolean) |
+|                   Statistics: Num rows: 4 Data size: 858 Basic stats: COMPLETE Column stats: NONE |
+|                   Filter Operator                  |
+|                     predicate: deptno is not null (type: boolean) |
+|                     Statistics: Num rows: 4 Data size: 858 Basic stats: COMPLETE Column stats: NONE |
+|                     Spark HashTable Sink Operator  |
+|                       keys:                        |
+|                         0 deptno (type: string)    |
+|                         1 deptno (type: string)    |
+|             Local Work:                            |
+|               Map Reduce Local Work                |
+|                                                    |
+|   Stage: Stage-1                                   |
+|     Spark                                          |
+|       DagName: hive_20210129112315_b48e30db-d209-422e-a371-f05afe64a6f7:56 |
+|       Vertices:                                    |
+|         Map 1                                      |
+|             Map Operator Tree:                     |
+|                 TableScan                          |
+|                   alias: emp                       |
+|                   filterExpr: deptno is not null (type: boolean) |
+|                   Statistics: Num rows: 11 Data size: 2373 Basic stats: COMPLETE Column stats: NONE |
+|                   Filter Operator                  |
+|                     predicate: deptno is not null (type: boolean) |
+|                     Statistics: Num rows: 11 Data size: 2373 Basic stats: COMPLETE Column stats: NONE |
+|                     Map Join Operator              |
+|                       condition map:               |
+|                            Inner Join 0 to 1       |
+|                       keys:                        |
+|                         0 deptno (type: string)    |
+|                         1 deptno (type: string)    |
+|                       outputColumnNames: _col1, _col12 |
+|                       input vertices:              |
+|                         1 Map 2                    |
+|                       Statistics: Num rows: 12 Data size: 2610 Basic stats: COMPLETE Column stats: NONE |
+|                       Select Operator              |
+|                         expressions: _col1 (type: string), _col12 (type: string) |
+|                         outputColumnNames: _col0, _col1 |
+|                         Statistics: Num rows: 12 Data size: 2610 Basic stats: COMPLETE Column stats: NONE |
+|                         File Output Operator       |
+|                           compressed: false        |
+|                           Statistics: Num rows: 12 Data size: 2610 Basic stats: COMPLETE Column stats: NONE |
+|                           table:                   |
+|                               input format: org.apache.hadoop.mapred.SequenceFileInputFormat |
+|                               output format: org.apache.hadoop.hive.ql.io.HiveSequenceFileOutputFormat |
+|                               serde: org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe |
+|             Local Work:                            |
+|               Map Reduce Local Work                |
+|                                                    |
+|   Stage: Stage-0                                   |
+|     Fetch Operator                                 |
+|       limit: -1                                    |
+|       Processor Tree:                              |
+|         ListSink                                   |
+|                                                    |
++----------------------------------------------------+
+69 rows selected (0.132 seconds)

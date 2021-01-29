@@ -1,6 +1,7 @@
 --虛擬機IP必須為192.168.56.103(建議固定)
 --連線到192.168.56.103(HOST)
 --登入身分為cloudera,密碼為cloudera
+--Cloudera Manager WebUI port: 7180
 [cloudera@cdh6 ~]$ id
 uid=501(cloudera) gid=501(cloudera) groups=501(cloudera),502(default)
 
@@ -874,7 +875,7 @@ drwx------   - cloudera cloudera          0 2019-06-27 19:01 /user/cloudera/.sta
 
 --顯示/user/cloudera/shakespeare.txt由那些hdfs區塊組成
 --請使用Cloudera Manager -> HDFS -> NameNode WebUI
---NameNode WebUI http://cdh6:9870/
+--NameNode WebUI http://cdh6:9870/     -> Hadoop 3 (Hadoop 2的NameNode使用port:50070)
   --Utilities -> browse the filesystem -> 選擇shakespeare.txt
 
 [cloudera@cdh6 ~]$ hdfs fsck -blocks -files /user/cloudera/shakespeare.txt
@@ -1383,7 +1384,7 @@ a1.sinks.k1.channel = c1
 \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 --SQOOP
 [root@cdh6 ~]# mysql -uroot -p
-Enter password:
+Enter password: cloudera
 Welcome to the MariaDB monitor.  Commands end with ; or \g.
 Your MariaDB connection id is 545
 Server version: 5.5.65-MariaDB MariaDB Server
@@ -2046,7 +2047,8 @@ Time taken: 2.145 seconds, Fetched: 5 row(s)   --第2次執行較第1次快許�
 --請注意,使用webHDFS時,http所連線的主機為NameNode(Active)的webUI port
                                      -----------------------
 [cloudera@cdh6 ~]$ curl -i -L "http://cdh6:9870/webhdfs/v1/user/cloudera/passwd?op=OPEN&user.name=cloudera"
-                                                                       ---------------------
+                                                          ---------------------
+																											   
 HTTP/1.1 307 Temporary Redirect
 Date: Tue, 15 Sep 2020 03:17:38 GMT
 Cache-Control: no-cache
@@ -2168,8 +2170,8 @@ drwxr-xr-x   - cloudera cloudera          0 2019-09-23 20:31 /user/cloudera/test
 [cloudera@cdh6 ~]$
 
 
-                                           local file          連線到NameNode
-                                           -----------         ----------------
+                                      local file         連線到NameNode
+									  -----------        ----------------
 [cloudera@cdh6 ~]$ curl -i -X PUT -T /etc/passwd "http://cdh6:9870/webhdfs/v1/user/cloudera/testdir/passwd?op=CREATE&user.name=cloudera"
 HTTP/1.1 100 Continue                                                                    -----------------------------
                                                                                          HDFS file

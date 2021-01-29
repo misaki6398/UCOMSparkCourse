@@ -3,7 +3,7 @@ libsvm format
 label              1:feature            2:feature             3:feature              4:feature             5:feature             6:feature            7:feature             8:feature              9:feature              10:feature
 [cloudera@quickstart ~]$ yum -y install python-pip
 
-[cloudera@quickstart ~]$ pyspark2
+[cloudera@quickstart ~]$ pyspark
 >>> from pyspark.ml.regression import LinearRegression
 >>> training_data = spark.read.format("libsvm").load("sample_linear_regression_data.txt")
 >>> training_data.show()
@@ -32,3 +32,81 @@ label              1:feature            2:feature             3:feature         
 | -0.250102447941961|(10,[0,1,2,3,4,5,...|
 +-------------------+--------------------+
 only showing top 20 rows
+
+
+from pyspark.ml import Pipeline
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.feature import HashingTF, Tokenizer
+
+# Prepare training documents from a list of (id, text, label) tuples.
+training = spark.createDataFrame([
+    (0, "a b c d e spark", 1.0),
+    (1, "b d", 0.0),
+    (2, "spark f g h", 1.0),
+    (3, "hadoop mapreduce", 0.0)
+], ["id", "text", "label"])
+
+>>> training.show()
++---+----------------+-----+
+| id|            text|label|
++---+----------------+-----+
+|  0| a b c d e spark|  1.0|
+|  1|             b d|  0.0|
+|  2|     spark f g h|  1.0|
+|  3|hadoop mapreduce|  0.0|
++---+----------------+-----+
+
+# Configure an ML pipeline, which consists of three stages: tokenizer, hashingTF, and lr.
+tokenizer = Tokenizer(inputCol="text", outputCol="words")
+
+hashingTF = HashingTF(inputCol=tokenizer.getOutputCol(), outputCol="features")
+lr = LogisticRegression(maxIter=10, regParam=0.001)
+pipeline = Pipeline(stages=[tokenizer, hashingTF, lr])
+
+# Fit the pipeline to training documents.
+model = pipeline.fit(training)
+
+# Prepare test documents, which are unlabeled (id, text) tuples.
+test = spark.createDataFrame([
+    (4, "spark i j k"),
+    (5, "l m n"),
+    (6, "spark hadoop spark"),
+    (7, "apache hadoop")
+], ["id", "text"])
+
+>>> test.show()
++---+------------------+
+| id|              text|
++---+------------------+
+|  4|       spark i j k|
+|  5|             l m n|
+|  6|spark hadoop spark|
+|  7|     apache hadoop|
++---+------------------+
+
+# Make predictions on test documents and print columns of interest.
+prediction = model.transform(test)
+
+>>> prediction.show()
++---+------------------+--------------------+--------------------+--------------------+--------------------+----------+
+| id|              text|               words|            features|       rawPrediction|         probability|prediction|
++---+------------------+--------------------+--------------------+--------------------+--------------------+----------+
+|  4|       spark i j k|    [spark, i, j, k]|(262144,[20197,24...|[-1.6609033227472...|[0.15964077387874...|       1.0|
+|  5|             l m n|           [l, m, n]|(262144,[18910,10...|[1.64218895265644...|[0.83783256854767...|       0.0|
+|  6|spark hadoop spark|[spark, hadoop, s...|(262144,[155117,2...|[-2.5980142174393...|[0.06926633132976...|       1.0|
+|  7|     apache hadoop|    [apache, hadoop]|(262144,[66695,15...|[4.00817033336812...|[0.98215753334442...|       0.0|
++---+------------------+--------------------+--------------------+--------------------+--------------------+----------+
+
+
+selected = prediction.select("id", "text", "probability", "prediction")
+for row in selected.collect():
+    rid, text, prob, prediction = row
+    print("(%d, %s) --> prob=%s, prediction=%f" % (rid, text, str(prob), prediction))
+	
+--預測結果
+                                    0                 1
+(4, spark i j k) --> prob=[0.1596407738787475,0.8403592261212525], prediction=1.000000
+(5, l m n) --> prob=[0.8378325685476744,0.16216743145232562], prediction=0.000000
+(6, spark hadoop spark) --> prob=[0.06926633132976037,0.9307336686702395], prediction=1.000000
+(7, apache hadoop) --> prob=[0.9821575333444218,0.01784246665557808], prediction=0.000000
+	
